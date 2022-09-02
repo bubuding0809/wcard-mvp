@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
-import { useSession } from "next-auth/react";
+import { useSession, getSession } from "next-auth/react";
 import Head from "next/head";
 import React from "react";
 import { trpc } from "../utils/trpc";
@@ -15,14 +15,14 @@ type TechnologyCardProps = {
   documentation: string;
 };
 
-const Home = ({ user }: any) => {
-  const { data: session } = useSession();
+const Home = () => {
+  const { data: session, status } = useSession();
   const hello = trpc.useQuery(["example.hello", { text: "from tRPC" }]);
-  const {
-    data: userData,
-    isError,
-    isFetching,
-  } = trpc.useQuery(["example.getUser", { id: session!.user!.id }]);
+  // const {
+  //   data: userData,
+  //   isError,
+  //   isLoading,
+  // } = trpc.useQuery(["example.getUser", { id: session!.user!.id }]);
 
   return (
     <>
@@ -32,6 +32,12 @@ const Home = ({ user }: any) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header />
+      <div>
+        <h1 className="text-4xl font-bold text-center">
+          {session?.user?.email}
+          {status}
+        </h1>
+      </div>
       <main className="container mx-auto flex flex-col items-center justify-center min-h-screen p-4">
         <h1 className="text-5xl md:text-[5rem] leading-normal font-extrabold text-gray-700">
           Create <span className="text-purple-300">T3</span> App
@@ -62,9 +68,36 @@ const Home = ({ user }: any) => {
         <div className="pt-6 text-2xl text-blue-500 flex justify-center items-center w-full">
           {hello.data ? <p>{hello.data.greeting}</p> : <p>Loading..</p>}
         </div>
+        {/* {isLoading && (
+          <div className="pt-6 text-2xl text-blue-500 flex justify-center items-center w-full">
+            <p>Loading...</p>
+          </div>
+        )}
+        {userData && (
+          <div className="pt-6 text-2xl text-blue-500 flex flex-col justify-center items-center w-full">
+            <p>id: {userData?.id}</p>
+            <p>email: {userData?.email}</p>
+          </div>
+        )}
+        {isError && (
+          <div className="pt-6 text-2xl text-blue-500 flex flex-col justify-center items-center w-full">
+            <p>Something went wrong</p>
+          </div>
+        )} */}
         <div className="pt-6 text-2xl text-blue-500 flex flex-col justify-center items-center w-full">
-          <p>id: {userData?.id}</p>
-          <p>email: {userData?.email}</p>
+          <button
+            className="border rounded px-4 py-2"
+            onClick={async () => {
+              try {
+                const users = await fetch("/api/examples");
+                console.log(await users.json());
+              } catch (error) {
+                console.log(error);
+              }
+            }}
+          >
+            hello
+          </button>
         </div>
       </main>
     </>
@@ -93,26 +126,20 @@ const TechnologyCard = ({
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const session = await getServerSession(req, res, authOptions);
+  // const session = await getServerSession(req, res, authOptions);
 
-  if (!session) {
-    return {
-      redirect: {
-        destination: "api/auth/signin",
-        permanent: false,
-      },
-      props: {},
-    };
-  }
-
-  const { id } = session.user!;
-  const user = await prisma.$queryRaw`
-    SELECT name, email FROM user WHERE id = ${id}
-  `;
+  // if (!session) {
+  //   return {
+  //     redirect: {
+  //       destination: "api/auth/signin",
+  //       permanent: false,
+  //     },
+  //     props: {},
+  //   };
+  // }
 
   return {
     props: {
-      user,
       session: await getServerSession(req, res, authOptions),
     },
   };
