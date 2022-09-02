@@ -33,7 +33,13 @@ const Signin = ({ csrfToken, providers }: SignInProps) => {
             {providers &&
               Object.values(providers).map(provider => (
                 <div key={provider.name} style={{ marginBottom: 0 }}>
-                  <button onClick={() => signIn(provider.id)}>
+                  <button
+                    onClick={() =>
+                      signIn(provider.id, {
+                        callbackUrl: "/",
+                      })
+                    }
+                  >
                     Sign in with {provider.name}
                   </button>
                 </div>
@@ -55,22 +61,22 @@ export default Signin;
 export const getServerSideProps: GetServerSideProps = async context => {
   const providers = await getProviders();
   const csrfToken = await getCsrfToken(context);
-  const session = await getServerSession(context.req, context.res, authOptions);
+  // const session = await getServerSession(context.req, context.res, authOptions);
 
-  if (!session) {
-    return {
-      props: {
-        providers,
-        csrfToken,
-      },
-    };
-  }
-
+  // if (!session) {
   return {
-    redirect: {
-      destination: "/",
-      permanent: false,
+    props: {
+      providers,
+      csrfToken,
     },
-    props: {},
   };
+  // }
+
+  // return {
+  //   redirect: {
+  //     destination: "/",
+  //     permanent: false,
+  //   },
+  //   props: {},
+  // };
 };
