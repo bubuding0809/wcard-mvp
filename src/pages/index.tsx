@@ -24,8 +24,6 @@ const Home = ({ user }: any) => {
     isFetching,
   } = trpc.useQuery(["example.getUser", { id: session!.user!.id }]);
 
-  console.log(user);
-
   return (
     <>
       <Head>
