@@ -1,13 +1,18 @@
 import type { NextPage } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
-import { useSession, getSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import React from "react";
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { GetServerSideProps } from "next";
 import Header from "../components/Header/Header";
+import { User } from "@prisma/client";
 import { prisma } from "../server/db/client";
+
+type HomeProps = {
+  user: User;
+};
 
 type TechnologyCardProps = {
   name: string;
@@ -15,14 +20,12 @@ type TechnologyCardProps = {
   documentation: string;
 };
 
-const Home = () => {
+const Home: NextPage<HomeProps> = props => {
   const { data: session, status } = useSession();
   const hello = trpc.useQuery(["example.hello", { text: "from tRPC" }]);
-  // const {
-  //   data: userData,
-  //   isError,
-  //   isLoading,
-  // } = trpc.useQuery(["example.getUser", { id: session!.user!.id }]);
+  const user = trpc.useQuery(["example.getUser", { id: session!.user!.id }], {
+    initialData: props.user,
+  });
 
   return (
     <>
@@ -32,10 +35,9 @@ const Home = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header />
-      <div>
+      <div className="pt-4">
         <h1 className="text-4xl font-bold text-center">
-          {session?.user?.email}
-          {status}
+          {status === "loading" ? "loading..." : status}
         </h1>
       </div>
       <main className="container mx-auto flex flex-col items-center justify-center min-h-screen p-4">
@@ -68,37 +70,24 @@ const Home = () => {
         <div className="pt-6 text-2xl text-blue-500 flex justify-center items-center w-full">
           {hello.data ? <p>{hello.data.greeting}</p> : <p>Loading..</p>}
         </div>
-        {/* {isLoading && (
+        {user.isLoading && (
           <div className="pt-6 text-2xl text-blue-500 flex justify-center items-center w-full">
             <p>Loading...</p>
           </div>
         )}
-        {userData && (
+        {user.isFetching && <div>fetching....</div>}
+        {user.data && (
           <div className="pt-6 text-2xl text-blue-500 flex flex-col justify-center items-center w-full">
-            <p>id: {userData?.id}</p>
-            <p>email: {userData?.email}</p>
+            <p>id: {user.data.id}</p>
+            <p>email: {user.data.email}</p>
+            <p>name: {user.data.name}</p>
           </div>
         )}
-        {isError && (
+        {user.isError && (
           <div className="pt-6 text-2xl text-blue-500 flex flex-col justify-center items-center w-full">
-            <p>Something went wrong</p>
+            <p>Something went wrong {JSON.stringify(user.error)}</p>
           </div>
-        )} */}
-        <div className="pt-6 text-2xl text-blue-500 flex flex-col justify-center items-center w-full">
-          <button
-            className="border rounded px-4 py-2"
-            onClick={async () => {
-              try {
-                const users = await fetch("/api/examples");
-                console.log(await users.json());
-              } catch (error) {
-                console.log(error);
-              }
-            }}
-          >
-            hello
-          </button>
-        </div>
+        )}
       </main>
     </>
   );
@@ -125,22 +114,29 @@ const TechnologyCard = ({
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  // const session = await getServerSession(req, res, authOptions);
+export const getServerSideProps: GetServerSideProps = async ctx => {
+  const session = await getServerSession(ctx.req, ctx.res, authOptions);
 
-  // if (!session) {
-  //   return {
-  //     redirect: {
-  //       destination: "api/auth/signin",
-  //       permanent: false,
-  //     },
-  //     props: {},
-  //   };
-  // }
+  if (!session) {
+    return {
+      redirect: {
+        destination: "api/auth/signin",
+        permanent: false,
+      },
+      props: {},
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: session.user!.id,
+    },
+  });
 
   return {
     props: {
-      session: await getServerSession(req, res, authOptions),
+      user,
+      session: await getServerSession(ctx.req, ctx.res, authOptions),
     },
   };
 };
