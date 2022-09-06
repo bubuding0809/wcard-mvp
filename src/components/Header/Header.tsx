@@ -1,4 +1,5 @@
 import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 import styles from "./Header.module.css";
 
 // The approach used in this component shows how to build a sign in and sign out
@@ -9,39 +10,42 @@ export default function Header() {
   const loading = status === "loading";
 
   return (
-    <header className={styles.header}>
-      <div className={styles.signedInStatus}>
-        <p
-          className={`nojs-show ${
-            !session && loading ? styles.loading : styles.loaded
-          }`}
-        >
-          {session?.user && (
-            <>
-              {session.user.image && (
-                <span
-                  style={{ backgroundImage: `url('${session.user.image}')` }}
-                  className={styles.avatar}
-                />
-              )}
-              <span className={styles.signedInText}>
-                <small>Signed in as</small>
-                <br />
-                <strong>{session.user.email ?? session.user.name}</strong>
-              </span>
-              <a
-                href={`/api/auth/signout`}
-                className={styles.button}
-                onClick={e => {
-                  e.preventDefault();
-                  signOut();
-                }}
-              >
-                Sign out
-              </a>
-            </>
-          )}
-        </p>
+    <header className="w-fit sticky top-0 ml-auto mr-auto">
+      <div className="bg-slate-500/50 border-slate-600 border-x-2 border-b-2 rounded-b-xl p-3 shadow-primary">
+        {session?.user && (
+          <div className="flex justify-between gap-2">
+            {session.user.image && (
+              <span
+                style={{ backgroundImage: `url('${session.user.image}')` }}
+                className={styles.avatar}
+              />
+            )}
+            <div className="flex flex-col">
+              <small>Signed in as</small>
+              <strong>{session.user.email ?? session.user.name}</strong>
+            </div>
+            <a
+              href={`/api/auth/signout`}
+              className="btn"
+              onClick={e => {
+                e.preventDefault();
+                signOut({
+                  callbackUrl: "/",
+                });
+              }}
+            >
+              Sign out
+            </a>
+          </div>
+        )}
+        {!session && (
+          <div className="flex justify-between items-center">
+            <p className="text-lg font-bold">{status}</p>
+            <Link href="/auth/signin">
+              <button className="btn">Sign in</button>
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   );
