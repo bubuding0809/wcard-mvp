@@ -9,10 +9,13 @@ import Header from "../../components/Header/Header";
 import { prisma } from "../../server/db/client";
 import { EventCard } from "../../components/Event/EventCard";
 import Link from "next/link";
+import { User } from "@prisma/client";
 
-type EventPageProps = {};
+type EventPageProps = {
+  user: User;
+};
 
-const EventPage: NextPage<EventPageProps> = () => {
+const EventPage: NextPage<EventPageProps> = ({ user }) => {
   const { data: session, status } = useSession();
 
   if (!session)
