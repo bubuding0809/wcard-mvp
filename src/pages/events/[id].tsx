@@ -79,7 +79,10 @@ const EventPage: NextPage<EventPageProps> = ({ event, error }) => {
             <div className="avatar-group -space-x-5 p-2">
               {eventData?.attendees.map(attendee => {
                 return (
-                  <div className="avatar hover:scale-110 transition-all duration-200 cursor-pointer">
+                  <div
+                    key={attendee.id}
+                    className="avatar hover:scale-110 transition-all duration-200 cursor-pointer"
+                  >
                     <div className="w-16 mask mask-squircle">
                       <img src={`${attendee.image}`} alt={`${attendee.name}`} />
                     </div>
