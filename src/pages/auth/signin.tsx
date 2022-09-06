@@ -1,10 +1,10 @@
 import { GetServerSideProps } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
+import { authOptions } from "../api/auth/[...nextauth]";
 import { signIn, getCsrfToken, getProviders } from "next-auth/react";
 import Image from "next/image";
 import Header from "../../components/Header/Header";
 import styles from "../../styles/Signin.module.css";
-import { authOptions } from "../api/auth/[...nextauth]";
 
 type SignInProps = {
   csrfToken: string;
@@ -14,7 +14,6 @@ type SignInProps = {
 const Signin = ({ csrfToken, providers }: SignInProps) => {
   return (
     <div style={{ overflow: "hidden", position: "relative" }}>
-      <Header />
       <div className={styles.wrapper} />
       <div className={styles.content}>
         <div className={styles.cardWrapper}>
@@ -32,7 +31,7 @@ const Signin = ({ csrfToken, providers }: SignInProps) => {
             <hr />
             {providers &&
               Object.values(providers).map(provider => (
-                <div key={provider.name} style={{ marginBottom: 0 }}>
+                <div key={provider.name} className="mb-2">
                   <button
                     onClick={() =>
                       signIn(provider.id, {
@@ -58,25 +57,24 @@ const Signin = ({ csrfToken, providers }: SignInProps) => {
 
 export default Signin;
 
-export const getServerSideProps: GetServerSideProps = async context => {
+export const getServerSideProps: GetServerSideProps = async ctx => {
   const providers = await getProviders();
-  const csrfToken = await getCsrfToken(context);
-  // const session = await getServerSession(context.req, context.res, authOptions);
+  const csrfToken = await getCsrfToken(ctx);
+  const session = await await getServerSession(ctx.req, ctx.res, authOptions);
 
-  // if (!session) {
+  if (session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
   return {
     props: {
       providers,
       csrfToken,
     },
   };
-  // }
-
-  // return {
-  //   redirect: {
-  //     destination: "/",
-  //     permanent: false,
-  //   },
-  //   props: {},
-  // };
 };
