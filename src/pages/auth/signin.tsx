@@ -3,7 +3,6 @@ import { unstable_getServerSession as getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { signIn, getCsrfToken, getProviders } from "next-auth/react";
 import Image from "next/image";
-import Header from "../../components/Header/Header";
 import styles from "../../styles/Signin.module.css";
 
 type SignInProps = {
@@ -11,56 +10,142 @@ type SignInProps = {
   providers: { [key: string]: any };
 };
 
-const Signin = ({ csrfToken, providers }: SignInProps) => {
+import { LockClosedIcon } from "@heroicons/react/20/solid";
+
+export default function SignInPage({ csrfToken, providers }: SignInProps) {
   return (
-    <div style={{ overflow: "hidden", position: "relative" }}>
-      <div className={styles.wrapper} />
-      <div className={styles.content}>
-        <div className={styles.cardWrapper}>
-          <Image
-            src="/darknobgwmotto.png"
-            width="150px"
-            height="150px"
-            alt="App Logo"
-            style={{ height: "85px", marginBottom: "20px" }}
-          />
-          <div className={styles.cardContent}>
-            <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-            <input placeholder="Email (Not Setup - Please use socials)" />
-            <button className={styles.primaryBtn}>Login</button>
-            <hr />
+    <>
+      {/*
+        This example requires updating your template:
+
+        ```
+        <html class="h-full bg-gray-50">
+        <body class="h-full">
+        ```
+      */}
+      <div className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md space-y-8">
+          <div>
+            <img
+              className="mx-auto h-44 w-auto"
+              src="/lightnobgwmotto.png"
+              alt="Your Company"
+            />
+            <h2 className=" text-center text-3xl font-bold tracking-tight text-gray-900">
+              Sign in to your account
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Or{" "}
+              <a
+                href="#"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                find out more
+              </a>
+            </p>
+          </div>
+          <form className="mt-8 space-y-6" action="#" method="POST">
+            <input type="hidden" name="remember" defaultValue="true" />
+            <div className="-space-y-px rounded-md shadow-sm">
+              <div>
+                <label htmlFor="email-address" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="email-address"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                  placeholder="Email address"
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="sr-only">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  className="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                  placeholder="Password"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-sm text-gray-900"
+                >
+                  Remember me
+                </label>
+              </div>
+
+              <div className="text-sm">
+                <a
+                  href="#"
+                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                  Forgot your password?
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                  <LockClosedIcon
+                    className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
+                    aria-hidden="true"
+                  />
+                </span>
+                Sign in
+              </button>
+            </div>
+          </form>
+          <div className="divider">continue with</div>
+          <div className="flex justify-between gap-2">
             {providers &&
               Object.values(providers).map(provider => (
                 <div key={provider.name} className="mb-2">
                   <button
+                    className="btn btn-outline btn-primary w-44 sm:w-52"
                     onClick={() =>
                       signIn(provider.id, {
                         callbackUrl: "/",
                       })
                     }
                   >
-                    Sign in with {provider.name}
+                    {provider.name}
                   </button>
                 </div>
               ))}
           </div>
         </div>
       </div>
-      <img
-        src="/login_pattern.svg"
-        alt="Pattern Background"
-        className={styles.styledPattern}
-      />
-    </div>
+    </>
   );
-};
-
-export default Signin;
+}
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
   const providers = await getProviders();
   const csrfToken = await getCsrfToken(ctx);
-  const session = await await getServerSession(ctx.req, ctx.res, authOptions);
+  const session = await getServerSession(ctx.req, ctx.res, authOptions);
 
   if (session) {
     return {
