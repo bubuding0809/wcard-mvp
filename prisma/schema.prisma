@@ -43,26 +43,56 @@ model Session {
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
-    id              String    @id @default(cuid())
-    name            String?
-    email           String?   @unique
-    emailVerified   DateTime?
-    image           String?
-    profile         Profile?
-    accounts        Account[]
-    sessions        Session[]
-    images          Image[]
-    eventsOwned     Event[]   @relation("Owner")
-    eventsAttending Event[]
-}
-
 model VerificationToken {
     identifier String
     token      String   @unique
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model User {
+    id            String    @id @default(cuid())
+    name          String?
+    email         String?   @unique
+    emailVerified DateTime?
+    image         String?
+    profile       Profile?
+
+    accounts        Account[]
+    sessions        Session[]
+    images          Image[]
+    eventsOwned     Event[]   @relation("Owner")
+    eventsAttending Event[]
+
+    connectionsInviteSent     Invite[] @relation("InvitesSent")
+    connectionsInviteReceived Invite[] @relation("InvitesRecieved")
+
+    connectionsRequested Connection[] @relation("ConnectionTo")
+    connectionsAccepted  Connection[] @relation("ConnectionFrom")
+}
+
+model Connection {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+
+    fromUserId String
+    fromUser   User   @relation("ConnectionFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+    toUserId String
+    toUser   User   @relation("ConnectionTo", fields: [toUserId], references: [id], onDelete: Cascade)
+}
+
+model Invite {
+    id        String       @id @default(cuid())
+    createdAt DateTime     @default(now())
+    status    InviteStatus @default(PENDING)
+
+    fromUserId String
+    fromUser   User   @relation("InvitesSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+    toUserId String
+    toUser   User   @relation("InvitesRecieved", fields: [toUserId], references: [id], onDelete: Cascade)
 }
 
 model Profile {
@@ -94,6 +124,12 @@ model Image {
     event   Event?  @relation(name: "Event", fields: [eventId], references: [id], onDelete: Cascade)
 }
 
+model EventSource {
+    id     String  @id @default(cuid())
+    name   String
+    events Event[]
+}
+
 model Event {
     id          String   @id @default(cuid())
     title       String
@@ -103,18 +139,22 @@ model Event {
     updatedAt   DateTime @updatedAt
 
     attendees User[]
-    images    Image[] @relation("Event")
+
+    images Image[] @relation("Event")
 
     locationId String
     location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
-    ownerId String
-    owner   User   @relation(name: "Owner", fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId String?
+    owner   User?   @relation(name: "Owner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+    sourceId String?
+    source   EventSource? @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 }
 
 model Location {
     id        String   @id @default(cuid())
-    name      String
+    name      String?
     longitude Float
     latitude  Float
     address   Address?
@@ -137,4 +177,10 @@ model Address {
 enum ImageRole {
     PROFILE
     EVENT
+}
+
+enum InviteStatus {
+    PENDING
+    ACCEPTED
+    REJECTED
 }
