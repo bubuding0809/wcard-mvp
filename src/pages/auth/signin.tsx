@@ -2,22 +2,12 @@ import { GetServerSideProps } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { signIn, getCsrfToken, getProviders } from "next-auth/react";
-import { Facebook, Google, Discord } from "@icons-pack/react-simple-icons";
 import { LockClosedIcon } from "@heroicons/react/20/solid";
+import SimpleLogo from "../../components/SimpleLogo";
 
 type SignInProps = {
   csrfToken: string;
   providers: { [key: string]: any };
-};
-
-type SocialLogos = {
-  [key: string]: any;
-};
-
-const socialLogos: SocialLogos = {
-  facebook: <Facebook />,
-  google: <Google />,
-  discord: <Discord />,
 };
 
 export default function SignInPage({ csrfToken, providers }: SignInProps) {
@@ -140,7 +130,11 @@ export default function SignInPage({ csrfToken, providers }: SignInProps) {
                     })
                   }
                 >
-                  {socialLogos[provider.name.toLowerCase()]}
+                  <SimpleLogo
+                    name={provider.name.toLowerCase()}
+                    size={20}
+                    title={provider.name}
+                  />
                 </button>
               ))}
           </div>
