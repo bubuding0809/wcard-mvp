@@ -2,17 +2,26 @@ import { GetServerSideProps } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { signIn, getCsrfToken, getProviders } from "next-auth/react";
-import Image from "next/image";
-import styles from "../../styles/Signin.module.css";
+import { Facebook, Google, Discord } from "@icons-pack/react-simple-icons";
+import { LockClosedIcon } from "@heroicons/react/20/solid";
 
 type SignInProps = {
   csrfToken: string;
   providers: { [key: string]: any };
 };
 
-import { LockClosedIcon } from "@heroicons/react/20/solid";
+type SocialLogos = {
+  [key: string]: any;
+};
+
+const socialLogos: SocialLogos = {
+  facebook: <Facebook />,
+  google: <Google />,
+  discord: <Discord />,
+};
 
 export default function SignInPage({ csrfToken, providers }: SignInProps) {
+  console.log(providers);
   return (
     <>
       {/*
@@ -119,21 +128,20 @@ export default function SignInPage({ csrfToken, providers }: SignInProps) {
             </div>
           </form>
           <div className="divider">continue with</div>
-          <div className="flex justify-between gap-2">
+          <div className="flex justify-between gap-3">
             {providers &&
               Object.values(providers).map(provider => (
-                <div key={provider.name} className="mb-2">
-                  <button
-                    className="btn btn-outline btn-primary w-44 sm:w-52"
-                    onClick={() =>
-                      signIn(provider.id, {
-                        callbackUrl: "/",
-                      })
-                    }
-                  >
-                    {provider.name}
-                  </button>
-                </div>
+                <button
+                  key={provider.name}
+                  className="btn btn-outline btn-primary flex-auto flex-wrap"
+                  onClick={() =>
+                    signIn(provider.id, {
+                      callbackUrl: "/",
+                    })
+                  }
+                >
+                  {socialLogos[provider.name.toLowerCase()]}
+                </button>
               ))}
           </div>
         </div>
