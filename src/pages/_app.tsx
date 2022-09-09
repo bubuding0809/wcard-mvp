@@ -1,19 +1,34 @@
 // src/pages/_app.tsx
+import type { ReactElement, ReactNode } from "react";
+import "../styles/globals.css";
+
+import type { NextPage } from "next";
+import type { AppProps } from "next/app";
+import type { AppType } from "next/dist/shared/lib/utils";
+import type { AppRouter } from "../server/router";
+
 import { httpBatchLink } from "@trpc/client/links/httpBatchLink";
 import { loggerLink } from "@trpc/client/links/loggerLink";
 import { withTRPC } from "@trpc/next";
-import { SessionProvider } from "next-auth/react";
-import type { AppType } from "next/dist/shared/lib/utils";
 import superjson from "superjson";
-import type { AppRouter } from "../server/router";
-import "../styles/globals.css";
+
+import { SessionProvider } from "next-auth/react";
 import { ReactQueryDevtools } from "react-query/devtools";
 
-const MyApp: AppType = ({
+export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+};
+
+const MyApp = ({
   Component,
   pageProps: { session, ...pageProps },
-}) => {
-  return (
+}: AppPropsWithLayout) => {
+  const getLayout = Component.getLayout ?? (page => page);
+  return getLayout(
     <SessionProvider session={session}>
       <Component {...pageProps} />
       <ReactQueryDevtools initialIsOpen={false} />
@@ -56,4 +71,4 @@ export default withTRPC<AppRouter>({
    * @link https://trpc.io/docs/ssr
    */
   ssr: false,
-})(MyApp);
+})(MyApp as AppType);
