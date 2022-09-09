@@ -3,7 +3,7 @@ import { Event, Location, User, Image } from "@prisma/client";
 import NextImage from "next/image";
 import { prisma } from "../../server/db/client";
 import Head from "next/head";
-import Header from "../../components/Header/Header";
+import Header from "../../components/Header";
 import { CalendarMini, MapPinMini } from "../../components/Icons";
 import { trpc } from "../../utils/trpc";
 
