@@ -10,6 +10,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.0",
     "@heroicons/react": "^2.0.10",
     "@icons-pack/react-simple-icons": "^5.5.0",
     "@next-auth/prisma-adapter": "^1.0.4",
