@@ -1,21 +1,23 @@
-import type { NextPage } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { trpc } from "../../utils/trpc";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { GetServerSideProps } from "next";
-import Header from "../../components/Header/Header";
+import Header from "../../components/Header";
 import { prisma } from "../../server/db/client";
 import { EventCard } from "../../components/Event/EventCard";
 import Link from "next/link";
 import { User } from "@prisma/client";
+import { NextPageWithLayout } from "../_app";
+import { ReactElement } from "react";
+import Layout from "../../components/Layout";
 
 type EventPageProps = {
   user: User;
 };
 
-const EventPage: NextPage<EventPageProps> = ({ user }) => {
+const EventPage: NextPageWithLayout<EventPageProps> = ({ user }) => {
   const { data: session, status } = useSession();
 
   if (!session)
@@ -78,4 +80,8 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
       user,
     },
   };
+};
+
+EventPage.getLayout = function getLayout(page: ReactElement) {
+  return <Layout title="Connect page">{page}</Layout>;
 };
