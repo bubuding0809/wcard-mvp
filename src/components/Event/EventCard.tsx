@@ -22,13 +22,13 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
       <Image
         loader={myLoader}
         src="picsum.photos"
-        width={250}
+        width={150}
         height={250}
         alt="Event picture"
         className="object-cover rounded-l-xl"
         layout="fixed"
       />
-      <div className="card-body p-4 w-60">
+      <div className="card-body p-4 w-52">
         <h2 className="card-title">{event.title}</h2>
         <p className="h-10 line-clamp-4">{event.description}</p>
         <div className="flex flex-col gap-2">
@@ -38,9 +38,6 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
             <p className="text-xs truncate">{event.location.name}</p>
           </div>
         </div>
-        {/* <div className="card-actions justify-end">
-      <button className="btn btn-primary">Watch</button>
-    </div> */}
       </div>
     </div>
   );
