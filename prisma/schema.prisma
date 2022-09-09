@@ -70,6 +70,9 @@ model User {
 
     connectionsRequested Connection[] @relation("ConnectionTo")
     connectionsAccepted  Connection[] @relation("ConnectionFrom")
+
+    messagesSent     Message[] @relation("MessageSender")
+    messagesRecieved Message[] @relation("MessageReciever")
 }
 
 model Connection {
@@ -81,6 +84,8 @@ model Connection {
 
     toUserId String
     toUser   User   @relation("ConnectionTo", fields: [toUserId], references: [id], onDelete: Cascade)
+
+    messages Message[]
 }
 
 model Invite {
@@ -172,6 +177,22 @@ model Address {
     zip        String?
     locationId String   @unique
     location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    text      String   @db.Text
+
+    connectionId String
+    connection   Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+    fromUserId String
+    fromUser   User   @relation("MessageSender", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+    toUserId String
+    toUser   User   @relation("MessageReciever", fields: [toUserId], references: [id], onDelete: Cascade)
 }
 
 enum ImageRole {
