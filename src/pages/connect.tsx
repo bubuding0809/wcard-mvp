@@ -1,9 +1,7 @@
 import { Profile, User } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
-import Head from "next/head";
 import { ReactElement } from "react";
-import BottomNav from "../components/BottomNav";
 import Header from "../components/Header";
 import Layout from "../components/Layout";
 import { prisma } from "../server/db/client";
@@ -28,7 +26,7 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = ({ users }) => {
               <div className="flex items-center gap-2 p-2">
                 <div className="avatar online">
                   <div className="w-12 rounded-full">
-                    <img src={user.image!} />
+                    <img src={user.image!} alt={user.name + "'s image"} />
                   </div>
                 </div>
                 <div className="w-full">

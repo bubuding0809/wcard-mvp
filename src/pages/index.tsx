@@ -20,12 +20,8 @@ const navigation = [
   { name: "About", href: "#" },
 ];
 
-type LandingPageProps = {
-  user: User;
-};
-
-const LandingPage: NextPage<LandingPageProps> = props => {
-  const { data: session, status } = useSession();
+const LandingPage: NextPage = () => {
+  const { data: session } = useSession();
 
   return (
     <>
