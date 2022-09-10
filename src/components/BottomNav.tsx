@@ -10,8 +10,11 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 
 const BottomNav: React.FC = () => {
+  // Get the current route and remove the first slash
+  // Use it to determine which bottom nav button should be active
   const { pathname } = useRouter();
   const selected = useMemo(() => pathname.split("/")[1], [pathname]);
+
   return (
     <div className="btm-nav bg-slate-50 ring-2 ring-slate-200">
       <Link href="/events">
