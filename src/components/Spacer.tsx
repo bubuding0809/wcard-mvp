@@ -1,4 +1,4 @@
-const Spacer: React.FC<{ size: number }> = ({ size }) => {
+const Spacer: React.FC<{ size?: number }> = ({ size = 8 }) => {
   return <div className={`p-${size}`}></div>;
 };
 

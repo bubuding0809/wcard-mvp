@@ -33,7 +33,7 @@ export default function Header() {
             </div>
             <a
               href={`/api/auth/signout`}
-              className="btn"
+              className="btn btn-md"
               onClick={e => {
                 e.preventDefault();
                 signOut({
@@ -41,7 +41,7 @@ export default function Header() {
                 });
               }}
             >
-              Sign out
+              <p className="text-xs">Sign out</p>
             </a>
           </div>
         )}

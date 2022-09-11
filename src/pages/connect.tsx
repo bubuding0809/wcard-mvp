@@ -4,6 +4,7 @@ import { unstable_getServerSession as getServerSession } from "next-auth";
 import { ReactElement } from "react";
 import Header from "../components/Header";
 import Layout from "../components/Layout";
+import Spacer from "../components/Spacer";
 import { prisma } from "../server/db/client";
 import { authOptions } from "./api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "./_app";
@@ -33,7 +34,7 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = ({ users }) => {
                   <h1 className="font-bold">{user.name}</h1>
                   <p className="text-xs">{user.email}</p>
                 </div>
-                <button className="btn btn-sm ml-auto">connect</button>
+                <button className="btn btn-sm ml-auto text-xs">connect</button>
               </div>
               {idx != users.length - 1 && <div className="divider m-0"></div>}
             </div>
