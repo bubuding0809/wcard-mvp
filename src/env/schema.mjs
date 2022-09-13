@@ -16,6 +16,10 @@ export const serverSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string(),
   FACEBOOK_CLIENT_ID: z.string(),
   FACEBOOK_CLIENT_SECRET: z.string(),
+  PUSHER_APP_ID: z.string(),
+  PUSHER_KEY: z.string(),
+  PUSHER_SECRET: z.string(),
+  PUSHER_CLUSTER: z.string(),
 });
 
 /**
