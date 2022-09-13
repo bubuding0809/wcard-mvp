@@ -1,7 +1,6 @@
 // src/pages/api/examples.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { env } from "../../../env/server.mjs";
-
 import Pusher from "pusher";
 
 export const pusher = new Pusher({
@@ -14,12 +13,12 @@ export const pusher = new Pusher({
 
 const examples = async (req: NextApiRequest, res: NextApiResponse) => {
   const { message, sender } = req.body;
-  const response = await pusher.trigger("chat", "chat-event", {
+  const response = await pusher.trigger("chat", "message-event", {
     message,
     sender,
   });
 
-  res.json({ message: "completed", response });
+  res.status(200).json(response);
 };
 
 export default examples;
