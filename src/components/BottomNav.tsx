@@ -53,14 +53,16 @@ const BottomNav: React.FC = () => {
         <BellIcon className="w-5 md:w-6 " />
         <span className="btm-nav-label text-sm text-slate-600">Activity</span>
       </button>
-      <button
-        className={`text-primary ${
-          selected === "message" && "active -top-0.5"
-        }`}
-      >
-        <ChatBubbleLeftRightIcon className="w-5 md:w-6" />
-        <span className="btm-nav-label text-sm text-slate-600">Message</span>
-      </button>
+      <Link href="/chat">
+        <button
+          className={`text-primary ${
+            selected === "message" && "active -top-0.5"
+          }`}
+        >
+          <ChatBubbleLeftRightIcon className="w-5 md:w-6" />
+          <span className="btm-nav-label text-sm text-slate-600">Message</span>
+        </button>
+      </Link>
     </div>
   );
 };

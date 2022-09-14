@@ -16,6 +16,7 @@ import Footer from "../components/Footer";
 const navigation = [
   { name: "Explore", href: "/events" },
   { name: "Connect", href: "/connect" },
+  { name: "Chat", href: "/chat" },
   { name: "Friends", href: "#" },
   { name: "About", href: "#" },
 ];
