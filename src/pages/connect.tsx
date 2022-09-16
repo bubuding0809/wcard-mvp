@@ -1,5 +1,5 @@
 import { Profile, User } from "@prisma/client";
-import { GetServerSideProps, NextPage } from "next";
+import { GetServerSideProps } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { ReactElement } from "react";
 import Header from "../components/Header";
@@ -41,6 +41,7 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = ({ users }) => {
           ))}
         </div>
       </main>
+      <Spacer size="lg" />
     </>
   );
 };
