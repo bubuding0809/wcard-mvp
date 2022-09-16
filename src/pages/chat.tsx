@@ -15,8 +15,8 @@ type chatMessageData = {
 };
 
 const LeftMessageBubble: React.FC<
-  chatMessageData & { idx: number; isImage: boolean }
-> = ({ message, sender, idx, isImage }) => {
+  chatMessageData & { idx: number; isImage: boolean; isFirst: boolean }
+> = ({ message, sender, idx, isImage, isFirst }) => {
   return (
     <div key={idx} className="flex gap-2 items-end self-start">
       <div className="avatar">
@@ -25,9 +25,10 @@ const LeftMessageBubble: React.FC<
         </div>
       </div>
       <p
-        className={`indent border rounded-full ${
-          isImage && "rounded-bl-none"
-        } p-1 px-3 bg-slate-100`}
+        className={`indent border rounded-r-3xl rounded-l-lg
+        ${isImage && "rounded-bl-3xl"} 
+        ${isFirst && "rounded-tl-3xl"}
+        p-1 px-3 bg-slate-100`}
       >
         {message}
       </p>
@@ -36,14 +37,15 @@ const LeftMessageBubble: React.FC<
 };
 
 const RightMessageBubble: React.FC<
-  chatMessageData & { idx: number; isImage: boolean }
-> = ({ message, sender, idx, isImage }) => {
+  chatMessageData & { idx: number; isImage: boolean; isFirst: boolean }
+> = ({ message, sender, idx, isImage, isFirst }) => {
   return (
     <div key={idx} className="flex gap-2 items-end self-end">
       <p
-        className={`indent border rounded-full ${
-          isImage && "rounded-br-none"
-        } p-1 px-3 bg-slate-100`}
+        className={`indent border rounded-l-3xl rounded-r-lg
+        ${isImage && "rounded-br-3xl"} 
+        ${isFirst && "rounded-tr-3xl"}
+        p-1 px-3 bg-slate-100`}
       >
         {message}
       </p>
@@ -61,7 +63,6 @@ const Chat = () => {
   const { data: session } = useSession();
   const [chats, setChats] = useState<chatMessageData[]>([]);
   const [messageToSend, setMessageToSend] = useState("");
-
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -83,11 +84,12 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView();
   }, [chats]);
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async e => {
     e.preventDefault();
+    if (!messageToSend) return;
     try {
       await axios.post("/api/pusher", {
         message: messageToSend,
@@ -102,7 +104,8 @@ const Chat = () => {
 
   return (
     <div className="flex flex-col gap-2 h-screen">
-      <Spacer />
+      <Spacer size="2xs" />
+
       <div className="ml-2 flex items-center gap-2">
         <button className="btn" onClick={() => router.back()}>
           <ArrowLeftIcon className="h-5 w-5 text-white" />
@@ -120,28 +123,33 @@ const Chat = () => {
         </div>
       </div>
 
-      <div className="flex flex-col bg-indigo-100 gap-0.5 p-4 h-full overflow-y-auto">
-        {chats.map((chat, idx, array) => {
-          return chat.sender.name === session?.user?.name ? (
-            <RightMessageBubble
-              message={chat.message}
-              sender={chat.sender}
-              idx={idx}
-              isImage={array[idx + 1]?.sender.id !== chat.sender.id}
-            />
-          ) : (
-            <LeftMessageBubble
-              message={chat.message}
-              sender={chat.sender}
-              idx={idx}
-              isImage={array[idx + 1]?.sender.id !== chat.sender.id}
-            />
-          );
-        })}
-        <div ref={bottomRef}></div>
+      <div className="flex flex-col h-full overflow-y-auto bg-indigo-200 p-2 py-4">
+        <div className="mt-auto flex flex-col gap-0.5">
+          {chats.map((chat, idx, array) => {
+            return chat.sender.name === session?.user?.name ? (
+              <RightMessageBubble
+                message={chat.message}
+                sender={chat.sender}
+                idx={idx}
+                isImage={array[idx + 1]?.sender.id !== chat.sender.id}
+                isFirst={array[idx - 1]?.sender.id !== chat.sender.id}
+              />
+            ) : (
+              <LeftMessageBubble
+                message={chat.message}
+                sender={chat.sender}
+                idx={idx}
+                isImage={array[idx + 1]?.sender.id !== chat.sender.id}
+                isFirst={array[idx - 1]?.sender.id !== chat.sender.id}
+              />
+            );
+          })}
+          <div ref={bottomRef}></div>
+        </div>
       </div>
 
-      <div className="w-ful px-2">
+      <div className="p-7"></div>
+      <div className="fixed bottom-0 w-full px-2 bg-slate-50 p-2">
         <form onSubmit={handleSubmit}>
           <div className="flex gap-2">
             <input
@@ -157,7 +165,6 @@ const Chat = () => {
           </div>
         </form>
       </div>
-      <Spacer />
     </div>
   );
 };
