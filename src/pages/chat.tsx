@@ -123,7 +123,9 @@ const Chat = () => {
   }, []);
 
   // handle sending of message by triggering pusher action on pusher via /api/pusher
-  const handleSubmit: FormEventHandler<HTMLFormElement> = async e => {
+  const handleSubmit: FormEventHandler<
+    HTMLFormElement | HTMLTextAreaElement
+  > = async e => {
     e.preventDefault();
     textareaRef.current?.focus();
     const message = messageToSend.trim();
@@ -207,7 +209,6 @@ const Chat = () => {
               onKeyDown={e => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  //@ts-ignore
                   handleSubmit(e);
                 }
               }}
