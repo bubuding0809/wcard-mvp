@@ -28,6 +28,7 @@ const LeftMessageBubble: React.FC<MessageBubbleProps> = ({
   data,
 }) => {
   const { message, sender, createdAt } = data;
+
   return (
     <div className="flex gap-2 items-end self-start">
       <div className="avatar">
@@ -94,6 +95,7 @@ const Chat = () => {
   const [chats, setChats] = useState<chatMessageData[]>([]);
   const [messageToSend, setMessageToSend] = useState("");
   const messageRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Setup up pusher actions on component mount
   useEffect(() => {
@@ -123,14 +125,17 @@ const Chat = () => {
   // handle sending of message by triggering pusher action on pusher via /api/pusher
   const handleSubmit: FormEventHandler<HTMLFormElement> = async e => {
     e.preventDefault();
-    if (!messageToSend) return;
+    textareaRef.current?.focus();
+    const message = messageToSend.trim();
+
+    if (!message) return;
 
     // Scroll to the latest message
     messageRef.current?.scrollIntoView();
 
     try {
       await axios.post("/api/pusher", {
-        message: messageToSend,
+        message,
         createdAt: new Date().toISOString(),
         sender: session?.user,
       });
@@ -192,11 +197,20 @@ const Chat = () => {
         <form onSubmit={handleSubmit}>
           <div className="flex gap-2 items-center">
             <TextareaAutosize
+              ref={textareaRef}
               className="w-full rounded-lg p-3 leading-5 resize-none"
               maxRows={4}
               value={messageToSend}
               onChange={e => setMessageToSend(e.target.value)}
               placeholder="Send something..."
+              autoFocus
+              onKeyDown={e => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  //@ts-ignore
+                  handleSubmit(e);
+                }
+              }}
             />
             <button className="btn btn-square btn-md self-end" type="submit">
               <PaperAirplaneIcon className="w-6 h-auto" />
