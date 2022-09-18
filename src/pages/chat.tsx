@@ -127,13 +127,15 @@ const Chat = () => {
     HTMLFormElement | HTMLTextAreaElement
   > = async e => {
     e.preventDefault();
-    textareaRef.current?.focus();
     const message = messageToSend.trim();
 
     if (!message) return;
 
     // Scroll to the latest message
     messageRef.current?.scrollIntoView();
+
+    // Refocus on textarea
+    textareaRef.current?.focus();
 
     try {
       await axios.post("/api/pusher", {

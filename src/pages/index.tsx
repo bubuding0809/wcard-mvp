@@ -83,18 +83,25 @@ const LandingPage: NextPage = () => {
                       </Link>
                     ))}
                     {session ? (
-                      <div className="avatar cursor-pointer">
-                        <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                          <img
-                            src={session!.user!.image!}
-                            alt={`${session.user?.name} image`}
-                          />
+                      <div className="flex items-center gap-4">
+                        <div className="avatar cursor-pointer">
+                          <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                            <img
+                              src={session!.user!.image!}
+                              alt={`${session.user?.name} image`}
+                            />
+                          </div>
                         </div>
+                        <Link href="/api/auth/signout">
+                          <a className="font-medium text-indigo-600 hover:text-indigo-500">
+                            Logout
+                          </a>
+                        </Link>
                       </div>
                     ) : (
                       <Link href="/api/auth/signin">
                         <a className="font-medium text-indigo-600 hover:text-indigo-500">
-                          Log in
+                          Login
                         </a>
                       </Link>
                     )}
