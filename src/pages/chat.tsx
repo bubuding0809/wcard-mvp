@@ -194,10 +194,10 @@ const Chat = () => {
         })}
       </div>
 
-      <div className="p-8"></div>
+      {/* <div className="p-8"></div> */}
 
       {/* Message input */}
-      <div className="fixed bottom-0 w-full px-2 bg-slate-50 p-2">
+      <div className="w-full px-2 bg-slate-50 p-2">
         <form onSubmit={handleSubmit}>
           <div className="flex gap-2 items-center">
             <TextareaAutosize
