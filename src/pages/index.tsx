@@ -5,7 +5,6 @@ import Head from "next/head";
 import React from "react";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { GetServerSideProps } from "next";
-import { User } from "@prisma/client";
 import Link from "next/link";
 
 import { Fragment } from "react";
@@ -25,7 +24,7 @@ const LandingPage: NextPage = () => {
   const { data: session } = useSession();
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Head>
         <title>WCard Connect</title>
         <meta name="description" content="WCard" />
@@ -214,6 +213,7 @@ const LandingPage: NextPage = () => {
             </main>
           </div>
         </div>
+
         <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
           <img
             className="h-56 w-full object-cover object-bottom sm:h-72 md:h-96 lg:h-full lg:w-full"
@@ -223,7 +223,7 @@ const LandingPage: NextPage = () => {
         </div>
       </div>
       <Footer />
-    </>
+    </div>
   );
 };
 
