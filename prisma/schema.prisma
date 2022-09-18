@@ -59,10 +59,11 @@ model User {
     image         String?
     profile       Profile?
 
-    accounts        Account[]
-    sessions        Session[]
-    images          Image[]
-    eventsOwned     Event[]   @relation("Owner")
+    accounts Account[]
+    sessions Session[]
+    images   Image[]
+
+    eventsOwned     Event[] @relation("Owner")
     eventsAttending Event[]
 
     connectionsInviteSent     Invite[] @relation("InvitesSent")
@@ -92,6 +93,9 @@ model Invite {
     id        String       @id @default(cuid())
     createdAt DateTime     @default(now())
     status    InviteStatus @default(PENDING)
+
+    location   Location? @relation(fields: [locationId], references: [id])
+    locationId String?
 
     fromUserId String
     fromUser   User   @relation("InvitesSent", fields: [fromUserId], references: [id], onDelete: Cascade)
@@ -164,6 +168,7 @@ model Location {
     latitude  Float
     address   Address?
     event     Event[]
+    Invite    Invite[]
 }
 
 model Address {

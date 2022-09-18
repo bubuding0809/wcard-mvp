@@ -12,10 +12,11 @@ export const pusher = new Pusher({
 });
 
 const examples = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { message, sender } = req.body;
+  const { message, sender, createdAt } = req.body;
   const response = await pusher.trigger("chat", "message-event", {
     message,
     sender,
+    createdAt,
   });
 
   res.status(200).json(response);
