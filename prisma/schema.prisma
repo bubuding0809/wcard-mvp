@@ -87,6 +87,8 @@ model Connection {
     toUser   User   @relation("ConnectionTo", fields: [toUserId], references: [id], onDelete: Cascade)
 
     messages Message[]
+
+    chatId String
 }
 
 model Invite {
