@@ -191,6 +191,7 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
               fromUserId,
               toUserId,
               createdAt: new Date(),
+              chatId: "temp",
             },
           ]
         );
@@ -286,7 +287,7 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
     // if there is a connection, return a message button
     if (connection) {
       return (
-        <Link href="/chat">
+        <Link href={`/chat/${connection.chatId}`}>
           <button className="btn btn-primary btn-sm ml-auto text-xs gap-1">
             message
           </button>
