@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createProtectedRouter } from "./protected-router";
+import { nanoid } from "nanoid";
 
 // protected router with queries that can only be hit if the user requesting is signed in
 export const connectionRouter = createProtectedRouter()
@@ -17,16 +18,19 @@ export const connectionRouter = createProtectedRouter()
       toUserId: z.string(),
     }),
     async resolve({ ctx, input }) {
+      const chatId = "chatroom" + nanoid(10);
       const connectionTo = await ctx.prisma.connection.create({
         data: {
           fromUserId: input.fromUserId,
           toUserId: input.toUserId,
+          chatId: chatId,
         },
       });
       const connectionFrom = await ctx.prisma.connection.create({
         data: {
           fromUserId: input.toUserId,
           toUserId: input.fromUserId,
+          chatId: chatId,
         },
       });
 
