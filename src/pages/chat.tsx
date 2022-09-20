@@ -5,7 +5,7 @@ import { GetServerSideProps } from "next";
 import { unstable_getServerSession as getServerSession, User } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { useSession } from "next-auth/react";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 import TextareaAutosize from "react-textarea-autosize";
@@ -37,13 +37,13 @@ const LeftMessageBubble: React.FC<MessageBubbleProps> = ({
         </div>
       </div>
       <p
-        className={`border rounded-r-3xl rounded-l-lg p-2 px-4 bg-slate-100 whitespace-pre-line leading-5 max-w-[75%] mr-auto overflow-hidden text-ellipsis        ${
+        className={`text-white border border-neutral bg-neutral rounded-r-3xl rounded-l-lg p-2 px-4 whitespace-pre-line leading-5 max-w-[75%] mr-auto overflow-hidden text-ellipsis        ${
           isImage && "rounded-bl-3xl"
         } 
         ${isFirst && "rounded-tl-3xl"}`}
       >
         {message}
-        <span className="ml-1.5 text-xs italic text-indigo-400">
+        <span className="ml-1.5 text-xs italic text-white">
           {new Date(createdAt).toLocaleString("en", {
             hour: "numeric",
             minute: "numeric",
@@ -67,13 +67,13 @@ const RightMessageBubble: React.FC<MessageBubbleProps> = ({
       }`}
     >
       <p
-        className={`border rounded-l-3xl rounded-r-lg p-2 px-4 bg-emerald-50/80 whitespace-pre-line leading-5 max-w-[75%] ml-auto overflow-hidden text-ellipsis
+        className={`text-white border border-primary rounded-l-3xl rounded-r-lg p-2 px-4 bg-primary whitespace-pre-line leading-5 max-w-[75%] ml-auto overflow-hidden text-ellipsis
         ${isImage && "rounded-br-3xl"} 
         ${isFirst && "rounded-tr-3xl"}
         `}
       >
         {message}
-        <span className="ml-1.5 text-xs italic text-indigo-400">
+        <span className="ml-1.5 text-xs italic text-white">
           {new Date(createdAt).toLocaleString("en", {
             hour: "numeric",
             minute: "numeric",
@@ -151,11 +151,14 @@ const Chat = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-indigo-200">
+    <div className="flex flex-col h-screen bg-primary/30">
       {/* Top nav */}
       <div className="flex items-center gap-2 p-2 bg-slate-50 border-b shadow-sm">
-        <button className="btn" onClick={() => router.back()}>
-          <ArrowLeftIcon className="h-5 w-5 text-white" />
+        <button
+          className="relative btn btn-circle bg-transparent border-none text-neutral hover:text-white"
+          onClick={() => router.back()}
+        >
+          <ChevronLeftIcon className="h-6 w-6 absolute left-2.5" />
         </button>
         <div className="avatar">
           <div className="w-12 rounded-full">
@@ -193,8 +196,6 @@ const Chat = () => {
           );
         })}
       </div>
-
-      {/* <div className="p-8"></div> */}
 
       {/* Message input */}
       <div className="w-full px-2 bg-slate-50 p-2">
