@@ -7,9 +7,8 @@ import {
 } from "@prisma/client";
 import { GetServerSideProps } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
-import { useSession } from "next-auth/react";
+import { SessionProvider, useSession } from "next-auth/react";
 import { ReactElement, useMemo } from "react";
-import Header from "../components/Header";
 import Layout from "../components/Layout";
 import { prisma } from "../server/db/client";
 import { trpc } from "../utils/trpc";
@@ -17,7 +16,6 @@ import { authOptions } from "./api/auth/[...nextauth]";
 import type { NextPageWithLayout } from "./_app";
 import {
   ClockIcon,
-  CheckBadgeIcon,
   LockClosedIcon,
   XMarkIcon,
   CheckIcon,
@@ -289,8 +287,7 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
     if (connection) {
       return (
         <Link href="/chat">
-          <button className="btn btn-primary btn-sm ml-auto text-xs gap-1 pl-2">
-            <CheckBadgeIcon className="w-5" />
+          <button className="btn btn-primary btn-sm ml-auto text-xs gap-1">
             message
           </button>
         </Link>
@@ -408,9 +405,7 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
 
   return (
     <>
-      <Header />
       <main className="flex flex-col items-center gap-4 mt-4 p-4">
-        <h1 className="text-4xl font-bold text-center">Connect</h1>
         <div className="flex flex-col w-full max-w-md">
           {props.users.map((user, idx) => (
             <div key={user.id}>
@@ -443,7 +438,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   if (!session) {
     return {
       redirect: {
-        destination: "/",
+        destination: "/api/auth/signin",
         permanent: false,
       },
     };
@@ -489,6 +484,6 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   };
 };
 
-ConnectPage.getLayout = function getLayout(page: ReactElement) {
-  return <Layout title="Connect page">{page}</Layout>;
+ConnectPage.getLayout = (page: ReactElement) => {
+  return <Layout title="Connect">{page}</Layout>;
 };

@@ -52,14 +52,16 @@ const LandingPage: NextPage = () => {
                   <div className="flex flex-shrink-0 flex-grow items-center lg:flex-grow-0">
                     <div className="flex w-full items-center justify-between md:w-auto">
                       <Link href="/">
-                        <a className="flex items-end sm:items-center">
+                        <a className="flex items-center">
                           <span className="sr-only">WCard</span>
                           <img
-                            alt="WCard"
+                            alt="WCard Logo"
                             className="h-8 w-auto sm:h-10"
-                            src="/BlueLogo.png"
+                            src="/PurpleLogo.png"
                           />
-                          <p className="text-xl sm:text-3xl font-bold">Card</p>
+                          <p className="text-3xl sm:text-4xl font-bold mt-1 ml-0.5">
+                            Card
+                          </p>
                         </a>
                       </Link>
 
@@ -137,7 +139,7 @@ const LandingPage: NextPage = () => {
                         ) : (
                           <img
                             className="h-8 w-auto"
-                            src="/BlueLogo.png"
+                            src="/PurpleLogo.png"
                             alt="WCard logo"
                           />
                         )}
@@ -202,7 +204,7 @@ const LandingPage: NextPage = () => {
                 <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                   <div className="rounded-md shadow">
                     <Link href="/events">
-                      <a className="flex w-full items-center justify-center rounded-md border border-transparent bg-primary px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 md:py-4 md:px-10 md:text-lg">
+                      <a className="flex w-full items-center justify-center rounded-md border border-transparent bg-primary px-8 py-3 text-base font-medium text-white hover:bg-purple-900 md:py-4 md:px-10 md:text-lg">
                         Get started
                       </a>
                     </Link>
@@ -210,7 +212,7 @@ const LandingPage: NextPage = () => {
                   <div className="mt-3 sm:mt-0 sm:ml-3">
                     <a
                       href="https://www.thisworldthesedays.com/wcard---learn-more.html"
-                      className="flex w-full items-center justify-center rounded-md border border-transparent bg-primary-content/40 px-8 py-3 text-base font-medium text-primary hover:bg-indigo-200 md:py-4 md:px-10 md:text-lg"
+                      className="flex w-full items-center justify-center rounded-md border border-transparent bg-primary-content/40 px-8 py-3 text-base font-medium text-primary hover:bg-purple-200 md:py-4 md:px-10 md:text-lg"
                     >
                       Live demo
                     </a>

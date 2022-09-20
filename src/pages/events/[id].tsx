@@ -3,7 +3,6 @@ import { Event, Location, User, Image } from "@prisma/client";
 import NextImage from "next/image";
 import { prisma } from "../../server/db/client";
 import Head from "next/head";
-import Header from "../../components/Header";
 import { CalendarMini, MapPinMini } from "../../components/Icons";
 import { trpc } from "../../utils/trpc";
 
@@ -47,7 +46,6 @@ const EventPage: NextPage<EventPageProps> = ({ event, error }) => {
         <meta name="description" content="WCard" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header />
       <main className="flex flex-col items-center gap-4 mt-4 p-4">
         <div className="flex flex-col gap-4 items-center max-w-lg">
           <h1 className="text-4xl font-bold text-center">{eventData?.title}</h1>
