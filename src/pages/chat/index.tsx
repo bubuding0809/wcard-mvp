@@ -3,90 +3,21 @@ import Pusher from "pusher-js";
 import axios from "axios";
 import { GetServerSideProps } from "next";
 import { unstable_getServerSession as getServerSession, User } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]";
+import { authOptions } from "../api/auth/[...nextauth]";
 import { useSession } from "next-auth/react";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 import TextareaAutosize from "react-textarea-autosize";
+import {
+  LeftMessageBubble,
+  RightMessageBubble,
+} from "../../components/Chat/ChatBubble";
 
 type chatMessageData = {
   message: string;
   sender: User;
   createdAt: string;
-};
-
-type MessageBubbleProps = {
-  data: chatMessageData;
-  isImage: boolean;
-  isFirst: boolean;
-};
-
-const LeftMessageBubble: React.FC<MessageBubbleProps> = ({
-  isImage,
-  isFirst,
-  data,
-}) => {
-  const { message, sender, createdAt } = data;
-
-  return (
-    <div className="flex gap-2 items-end self-start">
-      <div className="avatar">
-        <div className="w-8 rounded-full">
-          {isImage && <img src={sender.image!} alt="avatar" />}
-        </div>
-      </div>
-      <p
-        className={`text-white border border-neutral bg-neutral rounded-r-3xl rounded-l-lg p-2 px-4 whitespace-pre-line leading-5 max-w-[75%] mr-auto overflow-hidden text-ellipsis        ${
-          isImage && "rounded-bl-3xl"
-        } 
-        ${isFirst && "rounded-tl-3xl"}`}
-      >
-        {message}
-        <span className="ml-1.5 text-xs italic text-white">
-          {new Date(createdAt).toLocaleString("en", {
-            hour: "numeric",
-            minute: "numeric",
-          })}
-        </span>
-      </p>
-    </div>
-  );
-};
-
-const RightMessageBubble: React.FC<MessageBubbleProps> = ({
-  isImage,
-  isFirst,
-  data,
-}) => {
-  const { message, sender, createdAt } = data;
-  return (
-    <div
-      className={`flex gap-2 items-end self-end ${isImage && "mb-2"} ${
-        isFirst && "mt-2"
-      }`}
-    >
-      <p
-        className={`text-white border border-primary rounded-l-3xl rounded-r-lg p-2 px-4 bg-primary whitespace-pre-line leading-5 max-w-[75%] ml-auto overflow-hidden text-ellipsis
-        ${isImage && "rounded-br-3xl"} 
-        ${isFirst && "rounded-tr-3xl"}
-        `}
-      >
-        {message}
-        <span className="ml-1.5 text-xs italic text-white">
-          {new Date(createdAt).toLocaleString("en", {
-            hour: "numeric",
-            minute: "numeric",
-          })}
-        </span>
-      </p>
-      <div className="avatar">
-        <div className="w-8 rounded-full">
-          {isImage && <img src={sender.image!} alt="avatar" />}
-        </div>
-      </div>
-    </div>
-  );
 };
 
 const Chat = () => {
@@ -105,7 +36,7 @@ const Chat = () => {
     });
 
     // Subscribe to a channel
-    const channel = pusher.subscribe("chat");
+    const channel = pusher.subscribe("chat-public");
 
     // bind event triggered on channel to callback function
     channel.bind("message-event", (data: any) => {
@@ -118,7 +49,7 @@ const Chat = () => {
 
     return () => {
       // Clean up subscription to channel when component is unmounted
-      pusher.unsubscribe("chat");
+      pusher.unsubscribe("chat-public");
     };
   }, []);
 
@@ -142,6 +73,7 @@ const Chat = () => {
         message,
         createdAt: new Date().toISOString(),
         sender: session?.user,
+        chatId: "chat-public",
       });
     } catch (err) {
       console.log(err);
@@ -155,10 +87,10 @@ const Chat = () => {
       {/* Top nav */}
       <div className="flex items-center gap-2 p-2 bg-slate-50 border-b shadow-sm">
         <button
-          className="relative btn btn-circle bg-transparent border-none text-neutral hover:text-white"
+          className="relative btn btn-circle btn-sm bg-transparent border-none text-neutral hover:text-white"
           onClick={() => router.back()}
         >
-          <ChevronLeftIcon className="h-6 w-6 absolute left-2.5" />
+          <ChevronLeftIcon className="h-6 w-6 absolute right-1.5" />
         </button>
         <div className="avatar">
           <div className="w-12 rounded-full">
@@ -169,7 +101,9 @@ const Chat = () => {
           <p className="text-xl">
             Hello, <span className="font-bold">{session?.user?.name}</span>
           </p>
-          <p className="text-sm text-stone-500">A donkey aint no poggers</p>
+          <p className="text-sm text-stone-500">
+            Have a chat and make connections
+          </p>
         </div>
       </div>
 
