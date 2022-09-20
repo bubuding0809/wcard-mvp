@@ -16,7 +16,7 @@ const BottomNav: React.FC = () => {
   const selected = useMemo(() => pathname.split("/")[1], [pathname]);
 
   return (
-    <div className="btm-nav bg-slate-50 ring-2 ring-slate-200 z-50">
+    <div className="btm-nav bg-slate-50 ring-2 ring-slate-200 z-30">
       <Link href="/events">
         <button
           className={`text-primary ${
