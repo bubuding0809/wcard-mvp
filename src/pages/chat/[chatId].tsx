@@ -16,24 +16,103 @@ import {
 } from "@heroicons/react/24/outline";
 import Pusher from "pusher-js";
 import axios from "axios";
+import { Connection, Message } from "@prisma/client";
+import { trpc } from "../../utils/trpc";
+import { nanoid } from "nanoid";
 
 type PrivateChatRoomProps = {
-  chatId: string;
+  connection: Connection & {
+    toUser: User;
+  };
+  messages: (Message & {
+    fromUser: { name: string; image: string };
+    toUser: { name: string; image: string };
+  })[];
 };
 
-type chatMessageData = {
-  message: string;
-  sender: User;
-  createdAt: string;
-};
-
-const PrivateChatRoom: React.FC<PrivateChatRoomProps> = ({ chatId }) => {
+const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
+  const utils = trpc.useContext();
   const router = useRouter();
   const { data: session } = useSession();
-  const [chats, setChats] = useState<chatMessageData[]>([]);
+
   const [messageToSend, setMessageToSend] = useState("");
+
   const messageRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // trpc query for getting messages between current and other user
+  const messages = trpc.useQuery(
+    [
+      "message.getMessagesByConnectionChatId",
+      { chatId: props.connection.chatId },
+    ],
+    {
+      initialData: props.messages,
+    }
+  );
+
+  //trpc mutation for sending messages from current user to other user
+  const sendMessage = trpc.useMutation("message.createMessage", {
+    onMutate(newMessage) {
+      const { chatId, connectionId, fromUserId, text, toUserId } = newMessage;
+      // Cancel outgoing refetches (so they don't overwrite our optimistic update)
+      utils.cancelQuery(["message.getMessagesByConnectionChatId", { chatId }]);
+
+      // Snapshot the current state of the cache
+      const previousMessages = utils.getQueryData([
+        "message.getMessagesByConnectionChatId",
+        {
+          chatId,
+        },
+      ]);
+
+      // Optimistically update messages to the new state
+      if (previousMessages) {
+        utils.setQueryData(
+          ["message.getMessagesByConnectionChatId", { chatId }],
+          [
+            {
+              id: "temp" + nanoid(),
+              connectionId,
+              text,
+              fromUserId,
+              toUserId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              fromUser: {
+                name: session!.user!.name!,
+                image: session!.user!.image!,
+              },
+              toUser: {
+                name: session!.user!.name!,
+                image: session!.user!.image!,
+              },
+            },
+            ...previousMessages,
+          ]
+        );
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousMessages };
+    },
+    onError(_err, newMessage, ctx) {
+      // If the mutation failed, use the context returned from onMutate to roll back
+      utils.setQueryData(
+        [
+          "message.getMessagesByConnectionChatId",
+          { chatId: newMessage.chatId },
+        ],
+        ctx!.previousMessages!
+      );
+    },
+    onSettled(_data, _error, newMessage) {
+      utils.invalidateQueries([
+        "message.getMessagesByConnectionChatId",
+        { chatId: newMessage.chatId },
+      ]);
+    },
+  });
 
   // Setup up pusher actions on component mount
   useEffect(() => {
@@ -43,12 +122,58 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = ({ chatId }) => {
     });
 
     // Subscribe to a channel
-    const channel = pusher.subscribe(chatId);
+    const channel = pusher.subscribe(props.connection.chatId);
 
     // bind event triggered on channel to callback function
     channel.bind("message-event", (data: any) => {
-      const { sender, message, createdAt } = data;
-      setChats(prevState => [{ sender, message, createdAt }, ...prevState]);
+      console.time("message-event");
+      const { sender, text, createdAt } = data;
+
+      if (sender.id === session!.user!.id) return;
+
+      // Cancel outgoing refetches (so they don't overwrite our optimistic update)
+      utils.cancelQuery([
+        "message.getMessagesByConnectionChatId",
+        { chatId: props.connection.chatId },
+      ]);
+
+      // Snapshot the current state of the cache
+      const previousMessages = utils.getQueryData([
+        "message.getMessagesByConnectionChatId",
+        {
+          chatId: props.connection.chatId,
+        },
+      ]);
+
+      // Optimistically update messages to the new state
+      if (previousMessages) {
+        utils.setQueryData(
+          [
+            "message.getMessagesByConnectionChatId",
+            { chatId: props.connection.chatId },
+          ],
+          [
+            {
+              id: "temp" + nanoid(),
+              connectionId: props.connection.id,
+              text,
+              fromUserId: sender.id,
+              toUserId: session!.user!.id!,
+              createdAt: new Date(createdAt),
+              updatedAt: new Date(),
+              fromUser: {
+                name: sender.name,
+                image: sender.image,
+              },
+              toUser: {
+                name: "temp",
+                image: "temp",
+              },
+            },
+            ...previousMessages,
+          ]
+        );
+      }
     });
 
     // Scroll to the latest message
@@ -56,7 +181,7 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = ({ chatId }) => {
 
     return () => {
       // Clean up subscription to channel when component is unmounted
-      pusher.unsubscribe(chatId);
+      pusher.unsubscribe(props.connection.chatId);
     };
   }, []);
 
@@ -65,9 +190,8 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = ({ chatId }) => {
     HTMLFormElement | HTMLTextAreaElement
   > = async e => {
     e.preventDefault();
-    const message = messageToSend.trim();
-
-    if (!message) return;
+    const text = messageToSend.trim();
+    if (!text) return;
 
     // Scroll to the latest message
     messageRef.current?.scrollIntoView();
@@ -75,10 +199,19 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = ({ chatId }) => {
     // Refocus on textarea
     textareaRef.current?.focus();
 
+    // trpc muation to create message in database
+    sendMessage.mutate({
+      chatId: props.connection.chatId,
+      connectionId: props.connection.id,
+      fromUserId: props.connection.fromUserId,
+      toUserId: props.connection.toUserId,
+      text: messageToSend,
+    });
+
     try {
       await axios.post("/api/pusher", {
-        chatId,
-        message,
+        chatId: props.connection.chatId,
+        text,
         createdAt: new Date().toISOString(),
         sender: session?.user,
       });
@@ -101,36 +234,32 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = ({ chatId }) => {
         </button>
         <div className="avatar">
           <div className="w-12 rounded-full">
-            <img src={session!.user!.image!} alt="avatar" />
+            <img src={props.connection.toUser.image!} alt="avatar" />
           </div>
         </div>
         <div className="flex flex-col">
-          <p className="text-xl">
-            Hello, <span className="font-bold">{session?.user?.name}</span>
-          </p>
-          <p className="text-sm text-stone-500">
-            Have a chat and make connections
-          </p>
+          <p className="text-xl font-bold">{props.connection.toUser.name}</p>
+          <p className="text-sm text-stone-500">Make some coffee chat</p>
         </div>
       </div>
 
       {/* Message bubble area */}
       <div className="mt-auto flex flex-col-reverse gap-0.5 overflow-y-auto p-2 py-2">
         <div ref={messageRef}></div>
-        {chats.map((chat, idx, array) => {
+        {messages.data?.map((message, idx, arr) => {
           return (
-            <div key={chat.createdAt}>
-              {chat.sender.name === session?.user?.name ? (
+            <div key={message.id}>
+              {message.fromUserId === session?.user?.id ? (
                 <RightMessageBubble
-                  data={chat}
-                  isImage={array[idx - 1]?.sender.id !== chat.sender.id}
-                  isFirst={array[idx + 1]?.sender.id !== chat.sender.id}
+                  data={message}
+                  isImage={arr[idx - 1]?.fromUserId !== message.fromUserId}
+                  isFirst={arr[idx + 1]?.fromUserId !== message.fromUserId}
                 />
               ) : (
                 <LeftMessageBubble
-                  data={chat}
-                  isImage={array[idx - 1]?.sender.id !== chat.sender.id}
-                  isFirst={array[idx + 1]?.sender.id !== chat.sender.id}
+                  data={message}
+                  isImage={arr[idx - 1]?.fromUserId !== message.fromUserId}
+                  isFirst={arr[idx + 1]?.fromUserId !== message.fromUserId}
                 />
               )}
             </div>
@@ -187,6 +316,9 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
       fromUserId: session.user?.id,
       chatId,
     },
+    include: {
+      toUser: true,
+    },
   });
 
   if (!connection) {
@@ -198,9 +330,36 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     };
   }
 
+  const messages = await prisma.message.findMany({
+    where: {
+      connection: {
+        chatId,
+      },
+    },
+    include: {
+      fromUser: {
+        select: {
+          name: true,
+          image: true,
+        },
+      },
+      toUser: {
+        select: {
+          name: true,
+          image: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   return {
     props: {
-      chatId,
+      session,
+      connection: JSON.parse(JSON.stringify(connection)),
+      messages: JSON.parse(JSON.stringify(messages)),
     },
   };
 };

@@ -7,6 +7,7 @@ import { eventRouter } from "./event";
 import { inviteRouter } from "./invite";
 import { protectedExampleRouter } from "./protected-example-router";
 import { connectionRouter } from "./connection";
+import { messageRouter } from "./message";
 
 export const appRouter = createRouter()
   .transformer(superjson)
@@ -14,7 +15,8 @@ export const appRouter = createRouter()
   .merge("event.", eventRouter)
   .merge("auth.", protectedExampleRouter)
   .merge("invite.", inviteRouter)
-  .merge("connection.", connectionRouter);
+  .merge("connection.", connectionRouter)
+  .merge("message.", messageRouter);
 
 // export type definition of API
 export type AppRouter = typeof appRouter;
