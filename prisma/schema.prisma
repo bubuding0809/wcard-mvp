@@ -76,19 +76,18 @@ model User {
     messagesRecieved Message[] @relation("MessageReciever")
 }
 
-model Connection {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
+model Profile {
+    id          String  @id @default(cuid())
+    firstName   String?
+    lastName    String?
+    bio         String?
+    linkedinUrl String?
+    githubUrl   String?
+    twitterUrl  String?
+    facebookUrl String?
 
-    fromUserId String
-    fromUser   User   @relation("ConnectionFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
-
-    toUserId String
-    toUser   User   @relation("ConnectionTo", fields: [toUserId], references: [id], onDelete: Cascade)
-
-    messages Message[]
-
-    chatId String
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Invite {
@@ -106,18 +105,35 @@ model Invite {
     toUser   User   @relation("InvitesRecieved", fields: [toUserId], references: [id], onDelete: Cascade)
 }
 
-model Profile {
-    id          String  @id @default(cuid())
-    firstName   String?
-    lastName    String?
-    bio         String?
-    linkedinUrl String?
-    githubUrl   String?
-    twitterUrl  String?
-    facebookUrl String?
+model Connection {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
 
-    userId String @unique
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    fromUserId String
+    fromUser   User   @relation("ConnectionFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+    toUserId String
+    toUser   User   @relation("ConnectionTo", fields: [toUserId], references: [id], onDelete: Cascade)
+
+    messages Message[]
+
+    chatId String
+}
+
+model Message {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    text      String   @db.Text
+
+    connectionId String
+    connection   Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+    fromUserId String
+    fromUser   User   @relation("MessageSender", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+    toUserId String
+    toUser   User   @relation("MessageReciever", fields: [toUserId], references: [id], onDelete: Cascade)
 }
 
 model Image {
@@ -184,22 +200,6 @@ model Address {
     zip        String?
     locationId String   @unique
     location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
-}
-
-model Message {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    text      String   @db.Text
-
-    connectionId String
-    connection   Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-
-    fromUserId String
-    fromUser   User   @relation("MessageSender", fields: [fromUserId], references: [id], onDelete: Cascade)
-
-    toUserId String
-    toUser   User   @relation("MessageReciever", fields: [toUserId], references: [id], onDelete: Cascade)
 }
 
 enum ImageRole {
