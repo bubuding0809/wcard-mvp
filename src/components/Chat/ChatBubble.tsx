@@ -1,13 +1,17 @@
+import { Message } from "@prisma/client";
 import { User } from "next-auth";
 
-type chatMessageData = {
-  message: string;
-  sender: User;
-  createdAt: string;
-};
-
 type MessageBubbleProps = {
-  data: chatMessageData;
+  data: Message & {
+    fromUser: {
+      name: string | null;
+      image: string | null;
+    };
+    toUser: {
+      name: string | null;
+      image: string | null;
+    };
+  };
   isImage: boolean;
   isFirst: boolean;
 };
@@ -17,13 +21,13 @@ export const LeftMessageBubble: React.FC<MessageBubbleProps> = ({
   isFirst,
   data,
 }) => {
-  const { message, sender, createdAt } = data;
+  const { text, createdAt, fromUser } = data;
 
   return (
-    <div className="flex gap-2 items-end self-start">
+    <div className={`flex gap-2 items-end self-start ${isImage && "mb-2"}`}>
       <div className="avatar">
         <div className="w-8 rounded-full">
-          {isImage && <img src={sender.image!} alt="avatar" />}
+          {isImage && <img src={fromUser.image!} alt="avatar" />}
         </div>
       </div>
       <p
@@ -32,9 +36,9 @@ export const LeftMessageBubble: React.FC<MessageBubbleProps> = ({
         } 
         ${isFirst && "rounded-tl-3xl"}`}
       >
-        {message}
+        {text}
         <span className="ml-1.5 text-xs italic text-white">
-          {new Date(createdAt).toLocaleString("en", {
+          {data.createdAt.toLocaleString("en", {
             hour: "numeric",
             minute: "numeric",
           })}
@@ -49,22 +53,19 @@ export const RightMessageBubble: React.FC<MessageBubbleProps> = ({
   isFirst,
   data,
 }) => {
-  const { message, sender, createdAt } = data;
+  const { text, createdAt, fromUser } = data;
+
   return (
-    <div
-      className={`flex gap-2 items-end self-end ${isImage && "mb-2"} ${
-        isFirst && "mt-2"
-      }`}
-    >
+    <div className={`flex gap-2 items-end self-end ${isImage && "mb-2"}`}>
       <p
         className={`text-white border border-primary rounded-l-3xl rounded-r-lg p-2 px-4 bg-primary whitespace-pre-line leading-5 max-w-[75%] ml-auto overflow-hidden text-ellipsis
         ${isImage && "rounded-br-3xl"} 
         ${isFirst && "rounded-tr-3xl"}
         `}
       >
-        {message}
+        {text}
         <span className="ml-1.5 text-xs italic text-white">
-          {new Date(createdAt).toLocaleString("en", {
+          {data.createdAt.toLocaleString("en", {
             hour: "numeric",
             minute: "numeric",
           })}
@@ -72,7 +73,7 @@ export const RightMessageBubble: React.FC<MessageBubbleProps> = ({
       </p>
       <div className="avatar">
         <div className="w-8 rounded-full">
-          {isImage && <img src={sender.image!} alt="avatar" />}
+          {isImage && <img src={fromUser.image!} alt="avatar" />}
         </div>
       </div>
     </div>

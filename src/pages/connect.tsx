@@ -63,7 +63,7 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
       const { fromUserId, toUserId } = variables;
 
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      utils.cancelQuery(["invite.getInvitesSentByUserId"]);
+      utils.cancelQuery(["invite.getInvitesSentByUserId", { id: fromUserId }]);
 
       // Snapshot the current state of the cache
       const prevInvites = utils.getQueryData([
@@ -101,11 +101,24 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
         prevInvites,
       };
     },
-    onError(_err, _variables, ctx) {
-      utils.setQueryData(["invite.getInvitesSentByUserId"], ctx!.prevInvites!);
+    onError(_err, newInvite, ctx) {
+      utils.setQueryData(
+        [
+          "invite.getInvitesSentByUserId",
+          {
+            id: newInvite.fromUserId,
+          },
+        ],
+        ctx!.prevInvites!
+      );
     },
-    onSettled() {
-      utils.invalidateQueries(["invite.getInvitesSentByUserId"]);
+    onSettled(_data, _error, newInvite) {
+      utils.invalidateQueries([
+        "invite.getInvitesSentByUserId",
+        {
+          id: newInvite.fromUserId,
+        },
+      ]);
     },
   });
 
@@ -115,7 +128,10 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
       const { fromUserId, inviteId, status } = variables;
 
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      utils.cancelQuery(["invite.getInvitesReceivedByUserId"]);
+      utils.cancelQuery([
+        "invite.getInvitesReceivedByUserId",
+        { id: fromUserId },
+      ]);
 
       // Snapshot the current state of the cache
       const prevInvites = utils.getQueryData([
@@ -151,11 +167,17 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
         prevInvites,
       };
     },
-    onError(_err, _variables, ctx) {
-      utils.setQueryData(["invite.getInvitesSentByUserId"], ctx!.prevInvites!);
+    onError(_err, newInvite, ctx) {
+      utils.setQueryData(
+        ["invite.getInvitesSentByUserId", { id: newInvite.fromUserId }],
+        ctx!.prevInvites!
+      );
     },
-    onSettled() {
-      utils.invalidateQueries(["invite.getInvitesSentByUserId"]);
+    onSettled(_data, _error, newInvite) {
+      utils.invalidateQueries([
+        "invite.getInvitesSentByUserId",
+        { id: newInvite.fromUserId },
+      ]);
     },
   });
 
@@ -165,7 +187,10 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
       const { fromUserId, toUserId } = variables;
 
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      utils.cancelQuery(["connection.getConnectionsByUserId"]);
+      utils.cancelQuery([
+        "connection.getConnectionsByUserId",
+        { id: fromUserId },
+      ]);
 
       // Snapshot the current state of the cache
       const prevConnections = utils.getQueryData([
@@ -197,19 +222,22 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
         );
       }
 
+      // Return a context object with the snapshotted value for rollback incase of error
       return {
-        // Return a context object with the snapshotted value for rollback incase of error
         prevConnections,
       };
     },
-    onError(_err, _variables, ctx) {
+    onError(_err, newConnection, ctx) {
       utils.setQueryData(
-        ["connection.getConnectionsByUserId"],
+        ["connection.getConnectionsByUserId", { id: newConnection.fromUserId }],
         ctx!.prevConnections!
       );
     },
-    onSettled() {
-      utils.invalidateQueries(["connection.getConnectionsByUserId"]);
+    onSettled(_data, _error, newConnection) {
+      utils.invalidateQueries([
+        "connection.getConnectionsByUserId",
+        { id: newConnection.fromUserId },
+      ]);
     },
   });
 
@@ -219,7 +247,7 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
       const { fromUserId, inviteId } = variables;
 
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      utils.cancelQuery(["invite.getInvitesSentByUserId"]);
+      utils.cancelQuery(["invite.getInvitesSentByUserId", { id: fromUserId }]);
 
       // Snapshot the current state of the cache
       const prevInvites = utils.getQueryData([
@@ -247,11 +275,24 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
         prevInvites,
       };
     },
-    onError(_err, _variables, ctx) {
-      utils.setQueryData(["invite.getInvitesSentByUserId"], ctx!.prevInvites!);
+    onError(_err, deletedInvite, ctx) {
+      utils.setQueryData(
+        [
+          "invite.getInvitesSentByUserId",
+          {
+            id: deletedInvite.fromUserId,
+          },
+        ],
+        ctx!.prevInvites!
+      );
     },
-    onSettled() {
-      utils.invalidateQueries(["invite.getInvitesSentByUserId"]);
+    onSettled(_data, _error, deletedInvite) {
+      utils.invalidateQueries([
+        "invite.getInvitesSentByUserId",
+        {
+          id: deletedInvite.fromUserId,
+        },
+      ]);
     },
   });
 
