@@ -19,6 +19,7 @@ import axios from "axios";
 import { Connection, Message } from "@prisma/client";
 import { trpc } from "../../utils/trpc";
 import { nanoid } from "nanoid";
+import { env } from "../../env/server.mjs";
 
 type PrivateChatRoomProps = {
   connection: Connection & {
@@ -31,14 +32,18 @@ type PrivateChatRoomProps = {
 };
 
 const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
-  const utils = trpc.useContext();
   const router = useRouter();
   const { data: session } = useSession();
 
+  const [online, setOnline] = useState(false);
   const [messageToSend, setMessageToSend] = useState("");
 
+  // set ref to textarea and dummy message elements
   const messageRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // get trpc context
+  const utils = trpc.useContext();
 
   // trpc query for getting messages between current and other user
   const messages = trpc.useQuery(
@@ -119,13 +124,42 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
     // Create pusher instance for client
     const pusher = new Pusher("3439d72211e8cfad8d9b", {
       cluster: "ap1",
+      channelAuthorization: {
+        params: {
+          userId: session!.user!.id,
+        },
+        endpoint: "/api/pusher/auth",
+        transport: "ajax",
+      },
     });
 
     // Subscribe to a channel
-    const channel = pusher.subscribe(props.connection.chatId);
+    const chatChannel = pusher.subscribe(`private-${props.connection.chatId}`);
+    const presenceChannel = pusher.subscribe(
+      `presence-${props.connection.chatId}`
+    );
 
-    // bind event triggered on channel to callback function
-    channel.bind("message-event", (data: any) => {
+    // bind presence channel events
+    presenceChannel.bind("pusher:subscription_succeeded", (members: any) => {
+      if (members.count > 1) {
+        setOnline(true);
+      }
+    });
+
+    presenceChannel.bind("pusher:member_added", (member: any) => {
+      if (member.id !== session!.user!.id) setOnline(true);
+    });
+
+    presenceChannel.bind("pusher:member_removed", (member: any) => {
+      if (member.id !== session!.user!.id) setOnline(false);
+    });
+
+    // bind chat channel events
+    chatChannel.bind("pusher:subscription_error", (status: any) => {
+      console.log("subscription error", status);
+    });
+
+    chatChannel.bind("message-event", (data: any) => {
       console.time("message-event");
       const { sender, text, createdAt } = data;
 
@@ -181,7 +215,8 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
 
     return () => {
       // Clean up subscription to channel when component is unmounted
-      pusher.unsubscribe(props.connection.chatId);
+      pusher.unsubscribe(`private-${props.connection.chatId}`);
+      pusher.unsubscribe(`presence-${props.connection.chatId}`);
     };
   }, []);
 
@@ -210,7 +245,7 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
 
     try {
       await axios.post("/api/pusher", {
-        chatId: props.connection.chatId,
+        chatId: `private-${props.connection.chatId}`,
         text,
         createdAt: new Date().toISOString(),
         sender: session?.user,
@@ -232,7 +267,7 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
         >
           <ChevronLeftIcon className="h-6 w-6 absolute right-1.5" />
         </button>
-        <div className="avatar">
+        <div className={`avatar ${online && "online"}`}>
           <div className="w-12 rounded-full">
             <img src={props.connection.toUser.image!} alt="avatar" />
           </div>
