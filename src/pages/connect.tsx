@@ -7,8 +7,8 @@ import {
 } from "@prisma/client";
 import { GetServerSideProps } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
-import { ReactElement, useMemo } from "react";
+import { useSession } from "next-auth/react";
+import { ReactElement, useEffect, useMemo } from "react";
 import Layout from "../components/Layout";
 import { prisma } from "../server/db/client";
 import { trpc } from "../utils/trpc";
@@ -21,6 +21,9 @@ import {
   CheckIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import Pusher from "pusher-js";
+import { useQuery } from "react-query";
+import axios from "axios";
 
 type EventPageProps = {
   users: (User & {
@@ -34,6 +37,31 @@ type EventPageProps = {
 const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
   const utils = trpc.useContext();
   const { data: session } = useSession();
+
+  useEffect(() => {
+    const pusher = new Pusher("3439d72211e8cfad8d9b", {
+      cluster: "ap1",
+      channelAuthorization: {
+        params: {
+          userId: session!.user!.id,
+        },
+        endpoint: "/api/pusher/auth",
+        transport: "ajax",
+      },
+    });
+    pusher.subscribe("private-user-" + session?.user?.id);
+  }, []);
+
+  const { data: onlineUsersMap } = useQuery(
+    ["onlineUsers"],
+    async () => {
+      const response = await axios.get("/api/pusher/user-channels");
+      return response.data;
+    },
+    {
+      refetchInterval: 2000,
+    }
+  );
 
   // get all invites sent by current user
   const invitesSent = trpc.useQuery(
@@ -452,7 +480,11 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
           {props.users.map((user, idx) => (
             <div key={user.id}>
               <div className="flex items-center gap-2 p-2">
-                <div className="avatar online">
+                <div
+                  className={`avatar ${
+                    onlineUsersMap && onlineUsersMap[user.id]
+                  }`}
+                >
                   <div className="w-12 rounded-full">
                     <img src={user.image!} alt={user.name + "'s image"} />
                   </div>
