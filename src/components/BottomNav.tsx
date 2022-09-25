@@ -28,7 +28,7 @@ const BottomNav: React.FC = () => {
         </button>
       </Link>
       <button
-        className={`text-primary ${
+        className={`text-primary disabled ${
           selected === "explore" && "active -top-0.5"
         }`}
       >
@@ -46,7 +46,7 @@ const BottomNav: React.FC = () => {
         </button>
       </Link>
       <button
-        className={`text-primary ${
+        className={`text-primary disabled ${
           selected === "activity" && "active -top-0.5"
         }`}
       >
