@@ -22,7 +22,6 @@ export const LeftMessageBubble: React.FC<MessageBubbleProps> = ({
   data,
 }) => {
   const { text, createdAt, fromUser } = data;
-
   return (
     <div className={`flex gap-2 items-end self-start ${isImage && "mb-2"}`}>
       <div className="avatar">
@@ -38,7 +37,7 @@ export const LeftMessageBubble: React.FC<MessageBubbleProps> = ({
       >
         {text}
         <span className="ml-1.5 text-xs italic text-white">
-          {data.createdAt.toLocaleString("en", {
+          {createdAt.toLocaleString("en", {
             hour: "numeric",
             minute: "numeric",
           })}
@@ -65,7 +64,7 @@ export const RightMessageBubble: React.FC<MessageBubbleProps> = ({
       >
         {text}
         <span className="ml-1.5 text-xs italic text-white">
-          {data.createdAt.toLocaleString("en", {
+          {createdAt.toLocaleString("en", {
             hour: "numeric",
             minute: "numeric",
           })}

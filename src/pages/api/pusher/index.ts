@@ -11,7 +11,7 @@ export const pusher = new Pusher({
   useTLS: true,
 });
 
-const examples = async (req: NextApiRequest, res: NextApiResponse) => {
+export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { text, sender, createdAt, chatId } = req.body;
 
   const response = await pusher.trigger(chatId, "message-event", {
@@ -22,5 +22,3 @@ const examples = async (req: NextApiRequest, res: NextApiResponse) => {
 
   res.status(200).json(response);
 };
-
-export default examples;
