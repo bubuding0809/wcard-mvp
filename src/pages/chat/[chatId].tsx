@@ -2,14 +2,22 @@ import { GetServerSideProps } from "next";
 import { unstable_getServerSession as getServerSession, User } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { prisma } from "../../server/db/client";
-import TextareaAutosize from "react-textarea-autosize";
+import MessageForm from "../../components/Chat/MessageForm";
 import {
   LeftMessageBubble,
   RightMessageBubble,
 } from "../../components/Chat/ChatBubble";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { FormEventHandler, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  FormEvent,
+  FormEventHandler,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ChevronLeftIcon,
   PaperAirplaneIcon,
@@ -19,7 +27,6 @@ import axios from "axios";
 import { Connection, Message } from "@prisma/client";
 import { trpc } from "../../utils/trpc";
 import { nanoid } from "nanoid";
-import { env } from "../../env/server.mjs";
 
 type PrivateChatRoomProps = {
   connection: Connection & {
@@ -34,9 +41,7 @@ type PrivateChatRoomProps = {
 const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
   const router = useRouter();
   const { data: session } = useSession();
-
   const [online, setOnline] = useState(false);
-  const [messageToSend, setMessageToSend] = useState("");
 
   // set ref to textarea and dummy message elements
   const messageRef = useRef<HTMLDivElement>(null);
@@ -160,7 +165,6 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
     });
 
     chatChannel.bind("message-event", (data: any) => {
-      console.time("message-event");
       const { sender, text, createdAt } = data;
 
       if (sender.id === session!.user!.id) return;
@@ -221,9 +225,11 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
   }, []);
 
   // handle sending of message by triggering pusher action on pusher via /api/pusher
-  const handleSubmit: FormEventHandler<
-    HTMLFormElement | HTMLTextAreaElement
-  > = async e => {
+  const handleSubmit = async (
+    e: any,
+    messageToSend: string,
+    setMessageToSend: Dispatch<SetStateAction<string>>
+  ) => {
     e.preventDefault();
     const text = messageToSend.trim();
     if (!text) return;
@@ -234,6 +240,9 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
     // Refocus on textarea
     textareaRef.current?.focus();
 
+    // Optimistically clear message input
+    setMessageToSend("");
+
     // trpc muation to create message in database
     sendMessage.mutate({
       chatId: props.connection.chatId,
@@ -243,18 +252,35 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
       text: messageToSend,
     });
 
+    // send message to private chat channel
     try {
       await axios.post("/api/pusher", {
-        chatId: `private-${props.connection.chatId}`,
-        text,
-        createdAt: new Date().toISOString(),
-        sender: session?.user,
+        channel: `private-${props.connection.chatId}`,
+        event: "message-event",
+        data: {
+          text,
+          createdAt: new Date().toISOString(),
+          sender: session?.user,
+        },
       });
     } catch (err) {
       console.log(err);
     }
 
-    setMessageToSend("");
+    // send message to recipient user stream
+    try {
+      await axios.post("/api/pusher", {
+        channel: `private-user-${props.connection.toUserId}`,
+        event: "message-alert-event",
+        data: {
+          text,
+          createdAt: new Date().toISOString(),
+          sender: session?.user,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -301,32 +327,7 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
           );
         })}
       </div>
-
-      {/* Message input */}
-      <div className="w-full px-2 bg-slate-50 p-2">
-        <form onSubmit={handleSubmit}>
-          <div className="flex gap-2 items-center">
-            <TextareaAutosize
-              ref={textareaRef}
-              className="w-full rounded-lg p-3 leading-5 resize-none"
-              maxRows={4}
-              value={messageToSend}
-              onChange={e => setMessageToSend(e.target.value)}
-              placeholder="Send something..."
-              autoFocus
-              onKeyDown={e => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmit(e);
-                }
-              }}
-            />
-            <button className="btn btn-square btn-md self-end" type="submit">
-              <PaperAirplaneIcon className="w-6 h-auto" />
-            </button>
-          </div>
-        </form>
-      </div>
+      <MessageForm innerRef={textareaRef} handleSubmit={handleSubmit} />
     </div>
   );
 };
