@@ -12,13 +12,8 @@ export const pusher = new Pusher({
 });
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const { text, sender, createdAt, chatId } = req.body;
-
-  const response = await pusher.trigger(chatId, "message-event", {
-    text,
-    sender,
-    createdAt,
-  });
+  const { channel, event, data } = req.body;
+  const response = await pusher.trigger(channel, event, data);
 
   res.status(200).json(response);
 };

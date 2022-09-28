@@ -21,7 +21,6 @@ import {
   CheckIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import Pusher from "pusher-js";
 import { useQuery } from "react-query";
 import axios from "axios";
 
@@ -38,24 +37,10 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
   const utils = trpc.useContext();
   const { data: session } = useSession();
 
-  useEffect(() => {
-    const pusher = new Pusher("3439d72211e8cfad8d9b", {
-      cluster: "ap1",
-      channelAuthorization: {
-        params: {
-          userId: session!.user!.id,
-        },
-        endpoint: "/api/pusher/auth",
-        transport: "ajax",
-      },
-    });
-    pusher.subscribe("private-user-" + session?.user?.id);
-  }, []);
-
-  const { data: onlineUsersMap } = useQuery(
+  const { data: onlineUsers } = useQuery(
     ["onlineUsers"],
     async () => {
-      const response = await axios.get("/api/pusher/user-channels");
+      const response = await axios.get("/api/pusher/private-user-streams");
       return response.data;
     },
     {
@@ -481,9 +466,7 @@ const ConnectPage: NextPageWithLayout<EventPageProps> = props => {
             <div key={user.id}>
               <div className="flex items-center gap-2 p-2">
                 <div
-                  className={`avatar ${
-                    onlineUsersMap && onlineUsersMap[user.id]
-                  }`}
+                  className={`avatar ${onlineUsers && onlineUsers[user.id]}`}
                 >
                   <div className="w-12 rounded-full">
                     <img src={user.image!} alt={user.name + "'s image"} />
