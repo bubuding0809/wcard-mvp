@@ -55,9 +55,7 @@ const BottomNav: React.FC = () => {
       </button>
       <Link href="/chat">
         <button
-          className={`text-primary ${
-            selected === "message" && "active -top-0.5"
-          }`}
+          className={`text-primary ${selected === "chat" && "active -top-0.5"}`}
         >
           <ChatBubbleLeftRightIcon className="w-5 md:w-6" />
           <span className="btm-nav-label text-sm text-slate-600">Message</span>
