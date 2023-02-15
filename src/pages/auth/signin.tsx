@@ -4,7 +4,7 @@ import { authOptions } from "../api/auth/[...nextauth]";
 import { signIn, getCsrfToken, getProviders } from "next-auth/react";
 import { LockClosedIcon } from "@heroicons/react/20/solid";
 import SimpleLogo from "../../components/SimpleLogo";
-import Spacer from "../../components/Spacer";
+import Link from "next/link";
 
 type SignInProps = {
   csrfToken: string;
@@ -17,23 +17,24 @@ export default function SignInPage({ csrfToken, providers }: SignInProps) {
       <div className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
           <div>
-            <Spacer size={2} />
+            <div className="p-2"></div>
+
             <img
               className="mx-auto h-20 w-auto"
               src="/BlueLogo.png"
               alt="Your Company"
             />
+            <div className="p-2"></div>
             <h2 className="mt-4 text-center text-3xl font-bold tracking-tight text-gray-900">
               Sign in to your account
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
               Or{" "}
-              <a
-                href="#"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
-              >
-                find out more
-              </a>
+              <Link href="/">
+                <a className="font-medium text-indigo-600 hover:text-indigo-500">
+                  find out more
+                </a>
+              </Link>
             </p>
           </div>
           <form className="mt-8 space-y-6" action="#" method="POST">
@@ -119,7 +120,7 @@ export default function SignInPage({ csrfToken, providers }: SignInProps) {
                   className="btn btn-outline btn-primary flex-auto flex-wrap"
                   onClick={() =>
                     signIn(provider.id, {
-                      callbackUrl: "/",
+                      callbackUrl: "/connect",
                     })
                   }
                 >

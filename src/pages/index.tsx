@@ -5,7 +5,6 @@ import Head from "next/head";
 import React from "react";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { GetServerSideProps } from "next";
-import { User } from "@prisma/client";
 import Link from "next/link";
 
 import { Fragment } from "react";
@@ -16,6 +15,7 @@ import Footer from "../components/Footer";
 const navigation = [
   { name: "Explore", href: "/events" },
   { name: "Connect", href: "/connect" },
+  { name: "Chat", href: "/chat" },
   { name: "Friends", href: "#" },
   { name: "About", href: "#" },
 ];
@@ -24,7 +24,7 @@ const LandingPage: NextPage = () => {
   const { data: session } = useSession();
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Head>
         <title>WCard Connect</title>
         <meta name="description" content="WCard" />
@@ -52,14 +52,16 @@ const LandingPage: NextPage = () => {
                   <div className="flex flex-shrink-0 flex-grow items-center lg:flex-grow-0">
                     <div className="flex w-full items-center justify-between md:w-auto">
                       <Link href="/">
-                        <a className="flex items-end sm:items-center">
+                        <a className="flex items-center">
                           <span className="sr-only">WCard</span>
                           <img
-                            alt="WCard"
+                            alt="WCard Logo"
                             className="h-8 w-auto sm:h-10"
-                            src="/BlueLogo.png"
+                            src="/PurpleLogo.png"
                           />
-                          <p className="text-xl sm:text-3xl font-bold">Card</p>
+                          <p className="text-3xl sm:text-4xl font-bold mt-1 ml-0.5">
+                            Card
+                          </p>
                         </a>
                       </Link>
 
@@ -83,18 +85,25 @@ const LandingPage: NextPage = () => {
                       </Link>
                     ))}
                     {session ? (
-                      <div className="avatar cursor-pointer">
-                        <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                          <img
-                            src={session!.user!.image!}
-                            alt={`${session.user?.name} image`}
-                          />
+                      <div className="flex items-center gap-4">
+                        <div className="avatar cursor-pointer">
+                          <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                            <img
+                              src={session!.user!.image!}
+                              alt={`${session.user?.name} image`}
+                            />
+                          </div>
                         </div>
+                        <Link href="/api/auth/signout">
+                          <a className="font-medium text-indigo-600 hover:text-indigo-500">
+                            Logout
+                          </a>
+                        </Link>
                       </div>
                     ) : (
                       <Link href="/api/auth/signin">
                         <a className="font-medium text-indigo-600 hover:text-indigo-500">
-                          Log in
+                          Login
                         </a>
                       </Link>
                     )}
@@ -130,7 +139,7 @@ const LandingPage: NextPage = () => {
                         ) : (
                           <img
                             className="h-8 w-auto"
-                            src="/BlueLogo.png"
+                            src="/PurpleLogo.png"
                             alt="WCard logo"
                           />
                         )}
@@ -195,7 +204,7 @@ const LandingPage: NextPage = () => {
                 <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                   <div className="rounded-md shadow">
                     <Link href="/events">
-                      <a className="flex w-full items-center justify-center rounded-md border border-transparent bg-primary px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 md:py-4 md:px-10 md:text-lg">
+                      <a className="flex w-full items-center justify-center rounded-md border border-transparent bg-primary px-8 py-3 text-base font-medium text-white hover:bg-purple-900 md:py-4 md:px-10 md:text-lg">
                         Get started
                       </a>
                     </Link>
@@ -203,7 +212,7 @@ const LandingPage: NextPage = () => {
                   <div className="mt-3 sm:mt-0 sm:ml-3">
                     <a
                       href="https://www.thisworldthesedays.com/wcard---learn-more.html"
-                      className="flex w-full items-center justify-center rounded-md border border-transparent bg-primary-content/40 px-8 py-3 text-base font-medium text-primary hover:bg-indigo-200 md:py-4 md:px-10 md:text-lg"
+                      className="flex w-full items-center justify-center rounded-md border border-transparent bg-primary-content/40 px-8 py-3 text-base font-medium text-primary hover:bg-purple-200 md:py-4 md:px-10 md:text-lg"
                     >
                       Live demo
                     </a>
@@ -213,6 +222,7 @@ const LandingPage: NextPage = () => {
             </main>
           </div>
         </div>
+
         <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
           <img
             className="h-56 w-full object-cover object-bottom sm:h-72 md:h-96 lg:h-full lg:w-full"
@@ -222,9 +232,11 @@ const LandingPage: NextPage = () => {
         </div>
       </div>
       <Footer />
-    </>
+    </div>
   );
 };
+
+export default LandingPage;
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
   const session = await getServerSession(ctx.req, ctx.res, authOptions);
@@ -235,4 +247,3 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     },
   };
 };
-export default LandingPage;

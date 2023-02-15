@@ -2,18 +2,17 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["referentialIntegrity"]
+    provider      = "prisma-client-js"
+    binaryTargets = ["native", "darwin-arm64"]
 }
 
 datasource db {
-    provider             = "mysql"
+    provider = "mysql"
     // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.text annotations in model Account below
     // Further reading: 
     // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
     // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url                  = env("DATABASE_URL")
-    referentialIntegrity = "prisma"
+    url      = env("DATABASE_URL")
 }
 
 // Necessary for Next auth
@@ -59,10 +58,11 @@ model User {
     image         String?
     profile       Profile?
 
-    accounts        Account[]
-    sessions        Session[]
-    images          Image[]
-    eventsOwned     Event[]   @relation("Owner")
+    accounts Account[]
+    sessions Session[]
+    images   Image[]
+
+    eventsOwned     Event[] @relation("Owner")
     eventsAttending Event[]
 
     connectionsInviteSent     Invite[] @relation("InvitesSent")
@@ -73,31 +73,6 @@ model User {
 
     messagesSent     Message[] @relation("MessageSender")
     messagesRecieved Message[] @relation("MessageReciever")
-}
-
-model Connection {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-
-    fromUserId String
-    fromUser   User   @relation("ConnectionFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
-
-    toUserId String
-    toUser   User   @relation("ConnectionTo", fields: [toUserId], references: [id], onDelete: Cascade)
-
-    messages Message[]
-}
-
-model Invite {
-    id        String       @id @default(cuid())
-    createdAt DateTime     @default(now())
-    status    InviteStatus @default(PENDING)
-
-    fromUserId String
-    fromUser   User   @relation("InvitesSent", fields: [fromUserId], references: [id], onDelete: Cascade)
-
-    toUserId String
-    toUser   User   @relation("InvitesRecieved", fields: [toUserId], references: [id], onDelete: Cascade)
 }
 
 model Profile {
@@ -112,6 +87,52 @@ model Profile {
 
     userId String @unique
     user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Invite {
+    id        String       @id @default(cuid())
+    createdAt DateTime     @default(now())
+    status    InviteStatus @default(PENDING)
+
+    location   Location? @relation(fields: [locationId], references: [id])
+    locationId String?
+
+    fromUserId String
+    fromUser   User   @relation("InvitesSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+    toUserId String
+    toUser   User   @relation("InvitesRecieved", fields: [toUserId], references: [id], onDelete: Cascade)
+}
+
+model Connection {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+
+    fromUserId String
+    fromUser   User   @relation("ConnectionFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+    toUserId String
+    toUser   User   @relation("ConnectionTo", fields: [toUserId], references: [id], onDelete: Cascade)
+
+    messages Message[]
+
+    chatId String
+}
+
+model Message {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    text      String   @db.Text
+
+    connectionId String
+    connection   Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+    fromUserId String
+    fromUser   User   @relation("MessageSender", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+    toUserId String
+    toUser   User   @relation("MessageReciever", fields: [toUserId], references: [id], onDelete: Cascade)
 }
 
 model Image {
@@ -164,6 +185,7 @@ model Location {
     latitude  Float
     address   Address?
     event     Event[]
+    Invite    Invite[]
 }
 
 model Address {
@@ -177,22 +199,6 @@ model Address {
     zip        String?
     locationId String   @unique
     location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
-}
-
-model Message {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    text      String   @db.Text
-
-    connectionId String
-    connection   Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
-
-    fromUserId String
-    fromUser   User   @relation("MessageSender", fields: [fromUserId], references: [id], onDelete: Cascade)
-
-    toUserId String
-    toUser   User   @relation("MessageReciever", fields: [toUserId], references: [id], onDelete: Cascade)
 }
 
 enum ImageRole {

@@ -16,7 +16,7 @@ const BottomNav: React.FC = () => {
   const selected = useMemo(() => pathname.split("/")[1], [pathname]);
 
   return (
-    <div className="btm-nav bg-slate-50 ring-2 ring-slate-200">
+    <div className="btm-nav bg-slate-50 ring-2 ring-slate-200 z-30">
       <Link href="/events">
         <button
           className={`text-primary ${
@@ -28,7 +28,7 @@ const BottomNav: React.FC = () => {
         </button>
       </Link>
       <button
-        className={`text-primary ${
+        className={`text-primary disabled ${
           selected === "explore" && "active -top-0.5"
         }`}
       >
@@ -46,21 +46,21 @@ const BottomNav: React.FC = () => {
         </button>
       </Link>
       <button
-        className={`text-primary ${
+        className={`text-primary disabled ${
           selected === "activity" && "active -top-0.5"
         }`}
       >
         <BellIcon className="w-5 md:w-6 " />
         <span className="btm-nav-label text-sm text-slate-600">Activity</span>
       </button>
-      <button
-        className={`text-primary ${
-          selected === "message" && "active -top-0.5"
-        }`}
-      >
-        <ChatBubbleLeftRightIcon className="w-5 md:w-6" />
-        <span className="btm-nav-label text-sm text-slate-600">Message</span>
-      </button>
+      <Link href="/chat">
+        <button
+          className={`text-primary ${selected === "chat" && "active -top-0.5"}`}
+        >
+          <ChatBubbleLeftRightIcon className="w-5 md:w-6" />
+          <span className="btm-nav-label text-sm text-slate-600">Message</span>
+        </button>
+      </Link>
     </div>
   );
 };
