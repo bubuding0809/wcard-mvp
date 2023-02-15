@@ -9,19 +9,8 @@ import {
 } from "../../components/Chat/ChatBubble";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import {
-  Dispatch,
-  FormEvent,
-  FormEventHandler,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  ChevronLeftIcon,
-  PaperAirplaneIcon,
-} from "@heroicons/react/24/outline";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import Pusher from "pusher-js";
 import axios from "axios";
 import { Connection, Message } from "@prisma/client";
@@ -234,14 +223,14 @@ const PrivateChatRoom: React.FC<PrivateChatRoomProps> = props => {
     const text = messageToSend.trim();
     if (!text) return;
 
+    // Optimistically clear message input
+    setMessageToSend("");
+
     // Scroll to the latest message
     messageRef.current?.scrollIntoView();
 
     // Refocus on textarea
     textareaRef.current?.focus();
-
-    // Optimistically clear message input
-    setMessageToSend("");
 
     // trpc muation to create message in database
     sendMessage.mutate({

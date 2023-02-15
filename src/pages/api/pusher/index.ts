@@ -14,6 +14,8 @@ export const pusher = new Pusher({
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { channel, event, data } = req.body;
   const response = await pusher.trigger(channel, event, data);
-
+  if (event === "message-alert-event") {
+    console.log("message-alert-event", channel);
+  }
   res.status(200).json(response);
 };

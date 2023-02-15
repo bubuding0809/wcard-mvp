@@ -120,7 +120,7 @@ export default function SignInPage({ csrfToken, providers }: SignInProps) {
                   className="btn btn-outline btn-primary flex-auto flex-wrap"
                   onClick={() =>
                     signIn(provider.id, {
-                      callbackUrl: "/",
+                      callbackUrl: "/connect",
                     })
                   }
                 >

@@ -13,7 +13,6 @@ const SlideOver: React.FC<SlideOverProps> = ({ open, setOpen }) => {
   const { data: session, status } = useSession();
   const loading = status === "loading";
 
-  console.log(open);
   const getGreetings = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";

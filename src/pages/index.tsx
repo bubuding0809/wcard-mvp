@@ -236,6 +236,8 @@ const LandingPage: NextPage = () => {
   );
 };
 
+export default LandingPage;
+
 export const getServerSideProps: GetServerSideProps = async ctx => {
   const session = await getServerSession(ctx.req, ctx.res, authOptions);
 
@@ -245,4 +247,3 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     },
   };
 };
-export default LandingPage;
