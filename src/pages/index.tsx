@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
-import { signOut, useSession } from "next-auth/react";
+import { signOut, useSession, signIn } from "next-auth/react";
 import Head from "next/head";
 import React from "react";
 import { authOptions } from "./api/auth/[...nextauth]";
@@ -102,7 +102,13 @@ const LandingPage: NextPage = () => {
                       </div>
                     ) : (
                       <Link href="/api/auth/signin">
-                        <a className="font-medium text-indigo-600 hover:text-indigo-500">
+                        <a
+                          className="font-medium text-indigo-600 hover:text-indigo-500"
+                          onClick={e => {
+                            e.preventDefault();
+                            signIn();
+                          }}
+                        >
                           Login
                         </a>
                       </Link>
